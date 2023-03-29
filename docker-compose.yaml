@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+  ovc-database:
+    image: postgres:latest
+    container_name: ovc-database
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: ov
+      POSTGRES_DB: ovcommerce
+    volumes:
+      - ovc-database:/var/lib/postgresql/data
+    networks:
+      - ovc-network
+  ovc-adminer:
+    image: adminer:latest
+    container_name: ovc-adminer
+    tty: false
+    restart: always
+    volumes:
+      - ./ovc-admin/docker/adminer/plugins-enabled:/var/www/html/plugins-enabled
+      - ./ovc-admin/docker/adminer/css/css-custom.css:/var/www/html/adminer.css
+    environment:
+      ADMINER_DEFAULT_SERVER: ovc-database
+      ADMINER_PLUGINS: "dump-alter dump-bz2 dump-date dump-json dump-xml dump-zip edit-textarea edit-foreign sql-log edit-calendar enum-types enum-option file-upload translation json-column tinymce"
+    networks:
+      - ovc-network
+    ports:
+      - "81:8080"
+    depends_on:
+      - ovc-database
+  ovc-nginx:
+    image: nginx:latest
+    container_name: ovc-nginx
+    restart: always
+    networks:
+      - ovc-network
+    volumes:
+      - ./ovc-admin:/var/www
+      - ./ovc-admin/docker/nginx/logs:/var/log/nginx
+      - ./ovc-admin/docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./ovc-admin/docker/nginx/snippets:/etc/nginx/snippets
+      - ./ovc-admin/docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+  ovc-admin:
+    build:
+      dockerfile: Dockerfile
+      context: ./ovc-admin/docker
+    container_name: ovc-admin
+    restart: always
+    tty: true
+    volumes:
+      - ./ovc-admin:/var/www
+      - ./ovc-admin/docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./ovc-admin/docker/php/config:/usr/local/etc/php/conf.d
+      - ./ovc-admin/docker/php/wwwconf/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-php-fpm-custom.conf:ro
+    networks:
+      - ovc-network
+    ports:
+      - "2022:2022"
+    depends_on:
+      - ovc-database
+      - ovc-nginx
+  ovc-redis:
+    image: redis:latest
+    container_name: ovc-redis
+    restart: always
+    tty: true
+    volumes:
+      - ./ovc-admin/docker/redis/data:/data
+      - ./ovc-admin/docker/redis/logs:/var/log/redis
+    ports:
+      - "6380:6379"
+    networks:
+      - ovc-network
+  ovc-client:
+    build:
+      context: ./ovc-client
+      dockerfile: Dockerfile
+    container_name: ovc-client
+    restart: always
+    tty: true
+    volumes:
+      - ./ovc-client:/var/www
+    ports:
+      - "80:80"
+  ovc-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ovc-rabbitmq
+    restart: always
+    tty: true
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./ovc-admin/docker/rabbitmq/data:/var/lib/rabbitmq
+      - ./ovc-admin/docker/rabbitmq/config:/etc/rabbitmq/
+    command: bash -c "sleep 10; rabbitmq-server;"
+    networks:
+      - ovc-network
+volumes:
+  ovc-database:
+
+networks:
+  ovc-network:

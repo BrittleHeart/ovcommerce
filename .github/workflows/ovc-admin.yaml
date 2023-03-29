@@ -1,0 +1,98 @@
+name: Workflow for ovc-admin application
+run-name: Code consistency checker
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - 'feature/**'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ovc-admin/vendor/
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Composer integration
+        uses: php-actions/composer@v6
+        with:
+          php_version: 8.2
+          command: install --no-interaction --no-scripts --ansi --no-progress --prefer-dist --working-dir=./ovc-admin
+
+  phpstan:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ovc-admin/vendor/
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: 8.2
+      - name: PHPStan
+        working-directory: ./ovc-admin
+        run: |
+          vendor/bin/phpstan analyse --asni --xdebug --memory-limit 512M
+
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+    needs: [setup, phpstan]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ovc-admin/vendor/
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: 8.2
+      - name: PHP-CS-Fixer
+        working-directory: ./ovc-admin
+        run: |
+           vendor/bin/php-cs-fixer --ansi --config=./.php-cs-fixer.dist.php fix . --dry-run
+
+  psalm:
+    runs-on: ubuntu-latest
+    needs: [setup, phpstan, php-cs-fixer]
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ovc-admin/vendor/
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php_version: 8.2
+      - name: Psalm
+        working-directory: ./ovc-admin
+        run: |
+          vendor/bin/psalm
