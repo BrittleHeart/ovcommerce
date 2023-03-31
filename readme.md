@@ -1,3 +1,7 @@
+# Project architekture
+Make sure please, that you read an [Application Architecture](architecture.md) file, before you move on into coding.
+Information mantioned there, will help you understand my idea.
+
 # Introduction
 Welcome to the **OVCommerce** project. This project is a my personal project that is used to be a reference for my future projects. This project is e-commerce website that is built using the following technologies:
 
@@ -27,9 +31,13 @@ The goal of this e-commerce project is to create a responsive application that a
 * You understand a basis of the nginx configuration
 
 ## Installation
-1. Clone the project
-2. Run `docker-compose up -d` to start the project
-3. Enter to the `ovc-admin` container by running `docker exec -it ovc-admin /bin/bash`
-4. Run `composer install` to install the dependencies
-   
-TODO...
+Clone the project
+Run `docker-compose -p ov-ecommerce up -d --build` build and start the project.
+
+### Backend
+1. Go to `ovc-admin` container `docker exec -it ovc-admin /bin/bash`
+2. Run `composer install` to install the dependencies
+
+## Frontend
+1. Go to `ovc-client` container `docker exec -it ovc-client /bin/bash`
+2. Run `yarn` command to install the dependencies
