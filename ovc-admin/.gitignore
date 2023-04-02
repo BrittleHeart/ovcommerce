@@ -29,6 +29,6 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
-config/secrets/prod/**/*.*php
+config/secrets/prod/**/*.private.php
 # possible sensitive information
 config/secrets/dev/**/*.private.php
