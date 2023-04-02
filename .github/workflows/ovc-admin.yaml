@@ -72,7 +72,7 @@ jobs:
       - name: PHP-CS-Fixer
         working-directory: ./ovc-admin
         run: |
-           vendor/bin/php-cs-fixer --ansi fix --dry-run
+           vendor/bin/php-cs-fixer --ansi fix --dry-run --diff
 
   psalm:
     runs-on: ubuntu-latest
