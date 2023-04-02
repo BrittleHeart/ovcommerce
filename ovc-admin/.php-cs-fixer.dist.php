@@ -2,7 +2,15 @@
 
 $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__)
-    ->exclude(['var', 'tests', 'docker', 'bin'])
+    ->exclude(
+        [
+            'var',
+            'tests',
+            'docker',
+            'bin',
+            'config/secrets'
+        ]
+    )
 ;
 
 return (new PhpCsFixer\Config())

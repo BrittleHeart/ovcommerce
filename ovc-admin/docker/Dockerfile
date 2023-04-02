@@ -32,7 +32,8 @@ RUN apk add \
   rabbitmq-c \
   rabbitmq-c-dev \
   postfix \
-  autoconf
+  autoconf \
+  libsodium-dev
 
 RUN docker-php-ext-configure zip
 RUN docker-php-ext-configure intl
@@ -47,6 +48,7 @@ RUN docker-php-ext-install gd -j$(nproc) \
 
 RUN docker-php-ext-install opcache
 RUN docker-php-ext-install intl
+RUN docker-php-ext-install sodium
 
 RUN pecl install amqp
 RUN pecl install redis
