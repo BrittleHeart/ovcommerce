@@ -7,11 +7,16 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^2.9",
+        "doctrine/doctrine-migrations-bundle": "^3.2",
+        "doctrine/orm": "^2.14",
         "symfony/console": "6.2.*",
         "symfony/dotenv": "6.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.2.*",
+        "symfony/maker-bundle": "^1.48",
         "symfony/runtime": "6.2.*",
+        "symfony/security-bundle": "6.2.*",
         "symfony/yaml": "6.2.*"
     },
     "require-dev": {
@@ -64,7 +69,7 @@
             "@auto-scripts"
         ],
         "pre-check": {
-            "php-cs-fixer": "vendor/bin/php-cs-fixer --ansi --config=./.php-cs-fixer.dist.php fix . --dry-run",
+            "php-cs-fixer": "vendor/bin/php-cs-fixer --ansi fix --dry-run",
             "phpstan": "vendor/bin/phpstan analyse --ansi --xdebug --memory-limit 512M",
             "psalm": "vendor/bin/psalm"
         }
