@@ -28,6 +28,9 @@ class Opinion
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $product_comment = null;
 
+    #[ORM\Column]
+    private ?bool $is_approved = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -77,6 +80,18 @@ class Opinion
     public function setProductComment(?string $product_comment): self
     {
         $this->product_comment = $product_comment;
+
+        return $this;
+    }
+
+    public function isIsApproved(): ?bool
+    {
+        return $this->is_approved;
+    }
+
+    public function setIsApproved(bool $is_approved): self
+    {
+        $this->is_approved = $is_approved;
 
         return $this;
     }

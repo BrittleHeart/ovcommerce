@@ -8,6 +8,9 @@ function App() {
 
   return (
     <div className="App">
+      {/* TODO: Add checking, if user is allowed to */}
+      <h1>Back to a admin panel</h1>
+      <a href="http://localhost:8080/admin">Admin panel</a>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />

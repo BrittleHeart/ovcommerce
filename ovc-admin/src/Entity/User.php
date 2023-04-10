@@ -2,121 +2,183 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
 use App\Enum\UserAccountStatusEnum;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Unique;
 
+#[ApiResource(
+    stateless: true,
+    description: 'User resource',
+    operations: [
+        new Get(normalizationContext: ['groups' => 'user:item']),
+        new Post(normalizationContext: ['groups' => 'user:new']),
+        new Patch(normalizationContext: ['groups' => 'user:update']),
+        new Delete(normalizationContext: ['groups' => 'user:delete'])
+    ]
+)]
+#[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[ApiProperty(identifier: false, readable: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:update', 'user:delete'])]
     private ?int $id = null;
 
+    #[ApiProperty(identifier: true)]
+    #[ORM\Column(type: 'string', length: 36, unique: true)]
+    #[Groups(['user:item', 'user:new', 'user:delete'])]
+    private ?string $uuid = null;
+
     #[ORM\Column(length: 180, unique: true)]
+    #[NotBlank, Unique]
+    #[Groups(['user:item', 'user:new'])]
     private ?string $email = null;
 
     /**
      * @var array<array-key, string>
      */
     #[ORM\Column]
+    #[Groups(['user:item'])]
+    #[NotBlank]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:new', 'user:update'])]
+    #[NotBlank]
     private ?string $password = null;
 
     #[ORM\Column(length: 30, unique: true)]
-    private ?string $name = null;
+    #[Groups(['user:item', 'user:new'])]
+    #[NotBlank, Unique]
+    private ?string $username = null;
 
     #[ORM\Column(
-        enumType: UserAccountStatusEnum::class,
         options: [
-            'default' => UserAccountStatusEnum::EmailNotVerified,
+            'default' => UserAccountStatusEnum::EmailNotVerified->value,
         ]
     )]
+    #[Groups(['user:item', 'user:update'])]
+    #[NotBlank]
     private ?int $status = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['user:item', 'user:update'])]
+    #[NotBlank]
     private ?\DateTimeInterface $last_login = null;
 
     #[ORM\Column(options: ['default' => false])]
+    #[Groups(['user:item', 'user:update'])]
+    #[NotBlank]
     private ?bool $is_email_verified = null;
 
     #[ORM\Column(options: ['default' => 'now()'])]
+    #[Groups(['user:item', 'user:new'])]
+    #[NotBlank]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(
         type: Types::DATE_MUTABLE,
         options: ['default' => 'now()']
     )]
+    #[NotBlank]
+    #[Groups(['user:item', 'user:update', 'user:new'])]
     private ?\DateTimeInterface $updated_at = null;
 
     /**
      * @var ArrayCollection<int, UserAddress> $userAddresses
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserAddress::class)]
     private Collection $userAddresses;
 
     /**
      * @var ArrayCollection<int, UserPayment> $userPayments
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserPayment::class)]
     private Collection $userPayments;
 
     /**
      * @var ArrayCollection<int, UserAddressHistory> $userAddressHistories
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserAddressHistory::class)]
     private Collection $userAddressHistories;
 
     /**
      * @var ArrayCollection<int, UserAccountStatusHistory> $userAccountStatusHistories
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserAccountStatusHistory::class)]
     private Collection $userAccountStatusHistories;
-
+    
+    #[Groups(['user:item', "user:update"])]
     #[ORM\ManyToOne(inversedBy: 'for_user')]
     private ?LoyalityCard $loyalityCard = null;
 
     /**
      * @var ArrayCollection<int, UserOrder> $userOrders
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'by_user', targetEntity: UserOrder::class)]
     private Collection $userOrders;
 
     /**
      * @var ArrayCollection<int, UserFavorite> $userFavorites
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'by_user', targetEntity: UserFavorite::class)]
     private Collection $userFavorites;
 
     /**
      * @var ArrayCollection<int, UserProductOrderPointHistory> $userProductOrderPointHistories
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserProductOrderPointHistory::class)]
     private Collection $userProductOrderPointHistories;
 
     /**
      * @var ArrayCollection<int, Opinion> $opinions
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'by_user', targetEntity: Opinion::class)]
     private Collection $opinions;
 
     /**
      * @var ArrayCollection<int, VisitedUrl> $visitedUrls
      */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'by_user', targetEntity: VisitedUrl::class)]
     private Collection $visitedUrls;
+
+    /**
+     * @var ArrayCollection<int, UserCardRankingHistory> $userCardRankingHistories
+     */
+    #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
+    #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserCardRankingHistory::class)]
+    private Collection $userCardRankingHistories;
 
     public function __construct()
     {
@@ -129,6 +191,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->userProductOrderPointHistories = new ArrayCollection();
         $this->opinions = new ArrayCollection();
         $this->visitedUrls = new ArrayCollection();
+        $this->userCardRankingHistories = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->username;
     }
 
     public function getId(): ?int
@@ -204,14 +272,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getName(): ?string
+    public function getusername(): ?string
     {
-        return $this->name;
+        return $this->username;
     }
 
-    public function setName(string $name): self
+    public function setusername(string $username): self
     {
-        $this->name = $name;
+        $this->username = $username;
 
         return $this;
     }
@@ -264,6 +332,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): self
+    {
+        $this->created_at = new \DateTimeImmutable();
+
+        return $this;
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
@@ -272,6 +348,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setUpdatedAtValue(): self
+    {
+        $this->updated_at = new \DateTime();
 
         return $this;
     }
@@ -554,6 +638,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $visitedUrl->setByUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserCardRankingHistory>
+     */
+    public function getUserCardRankingHistories(): Collection
+    {
+        return $this->userCardRankingHistories;
+    }
+
+    public function addUserCardRankingHistory(UserCardRankingHistory $userCardRankingHistory): self
+    {
+        if (!$this->userCardRankingHistories->contains($userCardRankingHistory)) {
+            $this->userCardRankingHistories->add($userCardRankingHistory);
+            $userCardRankingHistory->setForUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserCardRankingHistory(UserCardRankingHistory $userCardRankingHistory): self
+    {
+        if ($this->userCardRankingHistories->removeElement($userCardRankingHistory)) {
+            // set the owning side to null (unless already changed)
+            if ($userCardRankingHistory->getForUser() === $this) {
+                $userCardRankingHistory->setForUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): self
+    {
+        $this->uuid = $uuid;
 
         return $this;
     }

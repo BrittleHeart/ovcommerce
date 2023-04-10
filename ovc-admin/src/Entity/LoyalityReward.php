@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\RewardTypeEnum;
 use App\Repository\LoyalityRewardRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -16,16 +17,20 @@ class LoyalityReward
     #[ORM\Column]
     private ?int $points_required = null;
 
-    #[ORM\Column]
+    #[ORM\Column(enumType: RewardTypeEnum::class)]
     private ?int $reward_type = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $reward_value = null;
 
+    #[ORM\ManyToOne(inversedBy: 'loyalityRewards')]
+    private ?LoyalityCard $loyality_card = null;
+    
     #[ORM\Column(
         options: ['default' => 'now()']
     )]
     private ?\DateTimeImmutable $created_at = null;
+
 
     public function getId(): ?int
     {
@@ -76,6 +81,18 @@ class LoyalityReward
     public function setCreatedAt(\DateTimeImmutable $created_at): self
     {
         $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getLoyalityCard(): ?LoyalityCard
+    {
+        return $this->loyality_card;
+    }
+
+    public function setLoyalityCard(?LoyalityCard $loyality_card): self
+    {
+        $this->loyality_card = $loyality_card;
 
         return $this;
     }

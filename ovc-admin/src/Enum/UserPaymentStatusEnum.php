@@ -4,8 +4,8 @@ namespace App\Enum;
 
 enum UserPaymentStatusEnum: int
 {
-    public const Submitted = 1;
-    public const InValidation = 2;
-    public const Rejected = 3;
-    public const Accepted = 4;
+    case Submitted = 1;
+    case InValidation = 2;
+    case Rejected = 3;
+    case Accepted = 4;
 }

@@ -33,7 +33,10 @@ RUN apk add \
   rabbitmq-c-dev \
   postfix \
   autoconf \
-  libsodium-dev
+  libsodium-dev \
+  nodejs \
+  npm \
+  libxslt-dev
 
 RUN docker-php-ext-configure zip
 RUN docker-php-ext-configure intl
@@ -44,7 +47,8 @@ RUN docker-php-ext-install gd -j$(nproc) \
   pgsql \
   bcmath \
   mbstring \ 
-  exif 
+  exif \
+  xsl
 
 RUN docker-php-ext-install opcache
 RUN docker-php-ext-install intl
@@ -61,6 +65,12 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' 
 RUN apk add symfony-cli
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+ENV PATH="/root/node_modules/.bin:${PATH}"
+
+RUN echo "alias sf='symfony console'" >> ~/.bashrc
+
+RUN npm i -g yarn
 
 CMD [ "php-fpm" ]
 

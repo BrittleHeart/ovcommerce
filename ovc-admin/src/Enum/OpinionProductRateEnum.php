@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum OpinionProductRateEnum: int
 {
-    public const Awfull = 1;
-    public const Bad = 2;
-    public const CanBe = 3;
-    public const Good = 4;
-    public const Amazing = 5;
+    case Awfull = 1;
+    case Bad = 2;
+    case CanBe = 3;
+    case Good = 4;
+    case Amazing = 5;
 }

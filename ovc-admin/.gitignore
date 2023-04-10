@@ -32,3 +32,9 @@
 config/secrets/prod/**/*.private.php
 # possible sensitive information
 config/secrets/dev/**/*.private.php
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###

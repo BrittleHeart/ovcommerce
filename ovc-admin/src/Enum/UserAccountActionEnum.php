@@ -2,10 +2,10 @@
 
 namespace App\Enum;
 
-enum UserAccountActionEnum: int
+enum UserAccountActionEnum: int 
 {
-    public const Open = 1;
-    public const Blocked = 2;
-    public const TemporamentlyClosed = 3;
-    public const Closed = 4;
+    case Open = 1;
+    case Blocked = 2;
+    case TemporamentlyClosed = 3;
+    case Closed = 4;
 }

@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum ReportDataTypeEnum: int
 {
-    public const Json = 1;
-    public const Csv = 2;
-    public const Pdf = 3;
+    case Json = 1;
+    case Csv = 2;
+    case Pdf = 3;
 }

@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum ProductAvailableOnEnum: int
 {
-    public const Digital = 1;
-    public const Shop = 2;
-    public const Both = 3;
+    case Digital = 1;
+    case Shop = 2;
+    case Both = 3;
 }

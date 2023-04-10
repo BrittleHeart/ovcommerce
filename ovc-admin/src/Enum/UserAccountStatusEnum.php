@@ -4,9 +4,9 @@ namespace App\Enum;
 
 enum UserAccountStatusEnum: int
 {
-    public const Open = 1;
-    public const Blocked = 2;
-    public const TemporamentlyClosed = 3;
-    public const Closed = 4;
-    public const EmailNotVerified = 5;
+    case Open = 1;
+    case Blocked = 2;
+    case TemporamentlyClosed = 3;
+    case Closed = 4;
+    case EmailNotVerified = 5;
 }
