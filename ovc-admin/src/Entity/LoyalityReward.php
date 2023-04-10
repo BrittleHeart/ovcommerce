@@ -25,12 +25,11 @@ class LoyalityReward
 
     #[ORM\ManyToOne(inversedBy: 'loyalityRewards')]
     private ?LoyalityCard $loyality_card = null;
-    
+
     #[ORM\Column(
         options: ['default' => 'now()']
     )]
     private ?\DateTimeImmutable $created_at = null;
-
 
     public function getId(): ?int
     {

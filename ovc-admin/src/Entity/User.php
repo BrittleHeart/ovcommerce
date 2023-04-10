@@ -4,6 +4,10 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\UserAccountStatusEnum;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -14,10 +18,6 @@ use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Metadata\Delete;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Unique;
 
@@ -28,7 +28,7 @@ use Symfony\Component\Validator\Constraints\Unique;
         new Get(normalizationContext: ['groups' => 'user:item']),
         new Post(normalizationContext: ['groups' => 'user:new']),
         new Patch(normalizationContext: ['groups' => 'user:update']),
-        new Delete(normalizationContext: ['groups' => 'user:delete'])
+        new Delete(normalizationContext: ['groups' => 'user:delete']),
     ]
 )]
 #[HasLifecycleCallbacks]
@@ -133,8 +133,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:item', 'user:new', 'user:update', 'user:delete'])]
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserAccountStatusHistory::class)]
     private Collection $userAccountStatusHistories;
-    
-    #[Groups(['user:item', "user:update"])]
+
+    #[Groups(['user:item', 'user:update'])]
     #[ORM\ManyToOne(inversedBy: 'for_user')]
     private ?LoyalityCard $loyalityCard = null;
 
@@ -192,11 +192,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->opinions = new ArrayCollection();
         $this->visitedUrls = new ArrayCollection();
         $this->userCardRankingHistories = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        return $this->username;
     }
 
     public function getId(): ?int

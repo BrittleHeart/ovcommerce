@@ -75,7 +75,7 @@ class UserCrudController extends AbstractCrudController
         yield AssociationField::new('userAddresses')->onlyOnDetail();
         yield AssociationField::new('userAddressHistories')->onlyOnDetail();
         yield AssociationField::new('userOrders', 'Orders')->onlyOnDetail();
-        yield AssociationField::new('userFavorites','Favorites')->onlyOnDetail();
+        yield AssociationField::new('userFavorites', 'Favorites')->onlyOnDetail();
         yield AssociationField::new('userProductOrderPointHistories')->onlyOnDetail();
         yield AssociationField::new('opinions')->onlyOnDetail();
         yield AssociationField::new('visitedUrls')->onlyOnDetail();

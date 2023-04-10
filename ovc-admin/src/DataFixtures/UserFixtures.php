@@ -7,8 +7,8 @@ use App\Enum\UserAccountStatusEnum;
 use App\Enum\UserRolesEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture
 {
@@ -16,7 +16,7 @@ class UserFixtures extends Fixture
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
-    ){
+    ) {
         $this->faker = Factory::create();
     }
 
@@ -30,15 +30,16 @@ class UserFixtures extends Fixture
             UserAccountStatusEnum::TemporamentlyClosed->value,
             UserAccountStatusEnum::EmailNotVerified->value,
         ];
-        
-        for($i = 0; $i <= 10; $i++) {
+
+        for ($i = 0; $i <= 10; ++$i) {
+            /** @var int $status */
             $status = $this->faker->randomElement($statusAvailable);
-    
+
             $user = new User();
             $user->setUuid($this->faker->unique()->uuid());
             $user->setUsername($this->faker->unique()->userName());
             $user->setEmail($this->faker->email());
-            $hashedPassword = $this->passwordHasher->hashPassword($user, "password");
+            $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
             $user->setPassword($hashedPassword);
             $user->setStatus($status);
             $user->setRoles([
@@ -55,13 +56,13 @@ class UserFixtures extends Fixture
     {
         $user = new User();
         $user->setUuid($this->faker->unique()->uuid());
-        $user->setUsername("Admin");
-        $user->setEmail("admin@example.com");
-        $hashedPassword = $this->passwordHasher->hashPassword($user, "password");
+        $user->setUsername('Admin');
+        $user->setEmail('admin@example.com');
+        $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
         $user->setPassword($hashedPassword);
         $user->setStatus(
             UserAccountStatusEnum::Open->value
-        );        
+        );
         $user->setRoles([
             UserRolesEnum::Admin->value,
         ]);

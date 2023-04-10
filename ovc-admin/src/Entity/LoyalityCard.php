@@ -46,6 +46,9 @@ class LoyalityCard
     #[ORM\OneToMany(mappedBy: 'card', targetEntity: LoyalityPoint::class)]
     private Collection $loyalityPoints;
 
+    /**
+     * @var ArrayCollection<int, LoyalityReward> $loyalityRewards
+     */
     #[ORM\OneToMany(mappedBy: 'loyality_card', targetEntity: LoyalityReward::class)]
     private Collection $loyalityRewards;
 

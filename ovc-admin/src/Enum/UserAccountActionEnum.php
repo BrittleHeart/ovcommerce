@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum UserAccountActionEnum: int 
+enum UserAccountActionEnum: int
 {
     case Open = 1;
     case Blocked = 2;
