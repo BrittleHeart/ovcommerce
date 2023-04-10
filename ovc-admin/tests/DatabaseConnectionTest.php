@@ -14,7 +14,7 @@ class DatabaseConnectionTest extends KernelTestCase
 
     #[Test]
     public function databaseConnectionIsSet(): void
-    {        
+    {
         $container = self::$kernel->getContainer();
         $doctrine = $container->get('doctrine')->getConnection();
 
