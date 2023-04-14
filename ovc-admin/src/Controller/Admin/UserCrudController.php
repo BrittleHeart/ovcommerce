@@ -60,17 +60,23 @@ class UserCrudController extends AbstractCrudController
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('uuid')->onlyOnDetail();
         yield AssociationField::new('loyalityCard', 'Loyality Card')->onlyOnDetail();
-        yield TextField::new('username')->hideOnForm();
-        yield EmailField::new('email')->hideOnForm();
+        yield TextField::new('username')->onlyOnDetail();
+        yield EmailField::new('email')->onlyOnDetail();
         yield ArrayField::new('roles');
         yield ChoiceField::new('status')
-                ->setChoices(UserAccountStatusEnum::cases());
+                ->setChoices([
+                    'Open' => UserAccountStatusEnum::Open->value,
+                    'Closed' => UserAccountStatusEnum::Closed->value,
+                    'Blocked' => UserAccountStatusEnum::Blocked->value,
+                    'Temporamently Closed' => UserAccountStatusEnum::TemporamentlyClosed->value,
+                    'Email Not Verified' => UserAccountStatusEnum::EmailNotVerified->value,
+                ]);
         yield BooleanField::new('is_email_verified', 'Email varified')
                 ->renderAsSwitch(false)
                 ->hideOnForm();
         yield DateTimeField::new('last_login')->hideOnForm();
         yield DateTimeField::new('created_at')->hideOnForm();
-        yield DateTimeField::new('updated_at')->onlyOnDetail();
+        yield DateTimeField::new('updated_at')->hideOnForm();
         yield AssociationField::new('userPayments')->onlyOnDetail();
         yield AssociationField::new('userAddresses')->onlyOnDetail();
         yield AssociationField::new('userAddressHistories')->onlyOnDetail();

@@ -2,6 +2,8 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Category;
+use App\Entity\Product;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -39,6 +41,10 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('User related');
         yield MenuItem::linkToCrud('User', 'fa fa-user', User::class);
+
+        yield MenuItem::section('Products');
+        yield MenuItem::linkToCrud('Category', 'fa fa-tag', Category::class);
+        yield MenuItem::linkToCrud('Product', 'fa fa-shopping-cart', Product::class);
     }
 
     public function configureActions(): Actions

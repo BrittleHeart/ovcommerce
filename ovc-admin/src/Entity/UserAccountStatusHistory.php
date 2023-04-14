@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\UserAccountActionEnum;
 use App\Repository\UserAccountStatusHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,7 +21,7 @@ class UserAccountStatusHistory
     #[ORM\JoinColumn(nullable: false)]
     private ?User $operator = null;
 
-    #[ORM\Column(enumType: UserAccountActionEnum::class)]
+    #[ORM\Column]
     private ?int $action = null;
 
     #[ORM\Column(options: ['default' => 'now()'])]

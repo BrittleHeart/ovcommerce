@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230410103625 extends AbstractMigration
+final class Version20230411104230 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -61,7 +61,7 @@ final class Version20230410103625 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_52EA1F09C87C042A ON order_item (for_order_id)');
         $this->addSql('CREATE INDEX IDX_52EA1F094584665A ON order_item (product_id)');
         $this->addSql('COMMENT ON COLUMN order_item.created_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE product (id INT NOT NULL, category_id INT NOT NULL, coupon_id INT DEFAULT NULL, name VARCHAR(100) NOT NULL, description TEXT NOT NULL, price NUMERIC(7, 2) NOT NULL, quantity INT NOT NULL, cover_url VARCHAR(255) NOT NULL, background_url VARCHAR(255) NOT NULL, merged_url VARCHAR(255) NOT NULL, is_on_sale BOOLEAN DEFAULT false NOT NULL, points INT NOT NULL, available_on INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT \'now()\' NOT NULL, updated_at DATE DEFAULT \'now()\' NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE product (id INT NOT NULL, category_id INT NOT NULL, coupon_id INT DEFAULT NULL, uuid VARCHAR(255) NOT NULL, name VARCHAR(100) NOT NULL, description TEXT NOT NULL, price NUMERIC(7, 2) NOT NULL, quantity INT NOT NULL, cover_url VARCHAR(255) NOT NULL, background_url VARCHAR(255) NOT NULL, merged_url VARCHAR(255) NOT NULL, is_on_sale BOOLEAN DEFAULT false NOT NULL, points INT NOT NULL, available_on INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updated_at VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_D34A04AD5E237E06 ON product (name)');
         $this->addSql('CREATE INDEX IDX_D34A04AD12469DE2 ON product (category_id)');
         $this->addSql('CREATE INDEX IDX_D34A04AD66C5951B ON product (coupon_id)');

@@ -7,6 +7,7 @@
 .AppleDouble
 .LSOverride
 
+.idea
 # Icon must end with two \r
 Icon
 
@@ -167,3 +168,5 @@ fabric.properties
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,phpstorm,macos
+
+.php-cs-fixer.cache

@@ -19,24 +19,23 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Unique;
 
 #[ApiResource(
-    stateless: true,
     description: 'User resource',
     operations: [
         new Get(normalizationContext: ['groups' => 'user:item']),
         new Post(normalizationContext: ['groups' => 'user:new']),
         new Patch(normalizationContext: ['groups' => 'user:update']),
         new Delete(normalizationContext: ['groups' => 'user:delete']),
-    ]
+    ],
+    stateless: true
 )]
 #[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ApiProperty(identifier: false, readable: false)]
+    #[ApiProperty(readable: false, identifier: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -49,7 +48,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $uuid = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[NotBlank, Unique]
     #[Groups(['user:item', 'user:new'])]
     private ?string $email = null;
 
@@ -58,7 +56,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     #[Groups(['user:item'])]
-    #[NotBlank]
     private array $roles = [];
 
     /**
@@ -66,12 +63,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     #[Groups(['user:new', 'user:update'])]
-    #[NotBlank]
     private ?string $password = null;
 
     #[ORM\Column(length: 30, unique: true)]
     #[Groups(['user:item', 'user:new'])]
-    #[NotBlank, Unique]
     private ?string $username = null;
 
     #[ORM\Column(
@@ -85,17 +80,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['user:item', 'user:update'])]
-    #[NotBlank]
     private ?\DateTimeInterface $last_login = null;
 
     #[ORM\Column(options: ['default' => false])]
     #[Groups(['user:item', 'user:update'])]
-    #[NotBlank]
     private ?bool $is_email_verified = null;
 
     #[ORM\Column(options: ['default' => 'now()'])]
     #[Groups(['user:item', 'user:new'])]
-    #[NotBlank]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(
