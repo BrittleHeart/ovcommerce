@@ -21,10 +21,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\NumericFilter;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ProductCrudController extends AbstractCrudController
 {
+    private const FILE_NAME_PATTERN = '[uuid]_[slug].[extension]';
+
     public static function getEntityFqcn(): string
     {
         return Product::class;
@@ -49,63 +50,73 @@ class ProductCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setSearchFields(['name', 'uuid'])
-            ->setDefaultSort(['id' => 'ASC'])
-            ->setPaginatorPageSize(10);
+            ->setSearchFields(['name', 'uuid']);
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
+
         yield TextField::new('uuid')->onlyOnDetail();
+
         yield TextField::new('name');
+
         yield TextEditorField::new('description');
+
         yield MoneyField::new('price')
             ->setCurrency('PLN');
-        yield IntegerField::new('quantity');
+
+        yield IntegerField::new('quantity')
+            ->setHelp('How many products we have in stock, max: 100000');
+
         yield ImageField::new('cover_url')
             ->setBasePath('/uploads/products')
             ->setUploadDir('/public/uploads/products')
-            ->setUploadedFileNamePattern(function (UploadedFile $file) {
-                return $this->setProductFileName($file);
-            })
+            ->setUploadedFileNamePattern(self::FILE_NAME_PATTERN)
             ->hideOnIndex();
+
         yield ImageField::new('background_url')
             ->setBasePath('/uploads/products')
             ->setUploadDir('/public/uploads/products')
-            ->setUploadedFileNamePattern(function (UploadedFile $file) {
-                return $this->setProductFileName($file);
-            })
+            ->setUploadedFileNamePattern(self::FILE_NAME_PATTERN)
             ->hideOnIndex();
+
         yield ImageField::new('merged_url')
             ->onlyOnDetail();
+
         yield BooleanField::new('is_on_sale');
-        yield IntegerField::new('points')->hideOnIndex();
+
+        yield IntegerField::new('points')
+            ->setHelp('max: 250')
+            ->hideOnIndex();
+
         yield ChoiceField::new('available_on')
             ->setChoices(ProductAvailableOnEnum::cases())
             ->hideOnIndex();
+
         yield DateTimeField::new('created_at')->hideOnForm();
+
         yield DateTimeField::new('updated_at')->onlyOnDetail();
+
         yield AssociationField::new('category')->hideOnIndex();
+
         yield AssociationField::new('orderItems')
             ->onlyOnDetail();
+
         yield AssociationField::new('userFavorites')
             ->onlyOnDetail();
+
         yield AssociationField::new('userProductOrderPointHistories')
             ->onlyOnDetail();
+
         yield AssociationField::new('coupon')
             ->setRequired(false)
             ->hideOnIndex();
+
         yield AssociationField::new('opinions')
             ->onlyOnDetail();
+
         yield AssociationField::new('visitedUrls')
             ->onlyOnDetail();
-    }
-
-    private function setProductFileName(UploadedFile $file): string
-    {
-        $checksum = hash_file('sha256', $file->getFilename());
-
-        return "{$checksum}_{$file->getClientOriginalName()}.{$file->getExtension()}";
     }
 }

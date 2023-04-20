@@ -32,8 +32,6 @@ class CategoryCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPaginatorPageSize(10)
-            ->setDefaultSort(['id' => 'ASC'])
             ->setSearchFields(['name']);
     }
 

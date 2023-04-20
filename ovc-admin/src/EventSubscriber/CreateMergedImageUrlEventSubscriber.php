@@ -2,9 +2,10 @@
 
 namespace App\EventSubscriber;
 
+use App\Dto\MergedImageDto;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
-use App\Service\ImageService;
+use App\Service\MergedImageService;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityPersistedEvent;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -15,8 +16,8 @@ readonly class CreateMergedImageUrlEventSubscriber implements EventSubscriberInt
     private string $productUploadDir;
 
     public function __construct(
-        private ImageService $imageService,
         private ProductRepository $productRepository,
+        private MergedImageService $imageService,
         #[Autowire('%app.baseURL%')] string $baseURL,
         #[Autowire('%app.productUploadDir%')] string $productUploadDir,
     ) {
@@ -25,7 +26,7 @@ readonly class CreateMergedImageUrlEventSubscriber implements EventSubscriberInt
     }
 
     /**
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public function createMergedImageUrl(AfterEntityPersistedEvent $event): void
     {
@@ -36,26 +37,38 @@ readonly class CreateMergedImageUrlEventSubscriber implements EventSubscriberInt
         }
 
         $background_url = $entity->getBackgroundUrl();
-        $image_url = $entity->getCoverUrl();
+        $cover_url = $entity->getCoverUrl();
 
-        if (null === $image_url || null === $background_url) {
+        if (null === $cover_url || null === $background_url) {
             return;
         }
 
-        $this->imageService->setFront($image_url);
-        $this->imageService->setBackground($background_url);
+        $mergedImageDto = new MergedImageDto(
+            $background_url,
+            $cover_url,
+            $this->imageService->getMergedDir(),
+            $this->baseURL,
+            $this->productUploadDir
+        );
 
-        $fileUniqueName = uniqid('merged_', true).'.jpg';
-        $uploadPath = $this->productUploadDir.'/'.$fileUniqueName;
-        $this->imageService->setFilename($uploadPath);
+        $mergedImageDto->coverUrl = $cover_url;
+        $mergedImageDto->backgroundUrl = $background_url;
 
-        $mergedImage = $this->imageService->createThumbnail();
-        if (null !== $mergedImage && isset($mergedImage->metadata()['filepath'])) {
-            $entity->setMergedUrl(
-                "{$this->baseURL}/uploads/products/{$fileUniqueName}"
-            );
+        $mergedImageDto->uploadDir = $this->imageService->getUploadDir();
+
+        $this->createImageThumbnail($mergedImageDto, $entity);
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    private function createImageThumbnail(MergedImageDto $dto, Product $entity): void
+    {
+        $imageThumbnail = $this->imageService->createThumbnail($dto);
+        if (null !== $imageThumbnail && isset($imageThumbnail->metadata()['filepath'])) {
+            $entity->setMergedUrl($this->imageService->getMergedUrl());
         } else {
-            throw new \Exception('File not found');
+            throw new \InvalidArgumentException('Something is wrong with DTO.');
         }
 
         $this->productRepository->save($entity, true);

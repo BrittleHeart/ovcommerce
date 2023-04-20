@@ -6,6 +6,7 @@
 parameters:
     app.productUploadDir: '%kernel.project_dir%/public/uploads/products'
     app.baseURL: '%env(BASE_URL)%'
+    test.productUploadDir: '%kernel.project_dir%/tests/uploads/products'
 
 services:
     # default configuration for services in *this* file
@@ -21,6 +22,12 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    App\Service\MergedImageService:
+        public: true
+        arguments:
+            $uploadDir: '%app.productUploadDir%'
+            $baseURL: '%app.baseURL%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

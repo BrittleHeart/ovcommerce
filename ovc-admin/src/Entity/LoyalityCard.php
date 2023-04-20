@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
-use App\Enum\LoyalityCardTypeEnum;
 use App\Repository\LoyalityCardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\String\ByteString;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: LoyalityCardRepository::class)]
 class LoyalityCard
 {
@@ -17,18 +18,7 @@ class LoyalityCard
     #[ORM\Column]
     private ?int $id = null;
 
-    /**
-     * @var ArrayCollection<int, User> $for_user
-     */
-    #[ORM\OneToMany(mappedBy: 'loyalityCard', targetEntity: User::class)]
-    private Collection $for_user;
-
-    #[ORM\Column(
-        enumType: LoyalityCardTypeEnum::class,
-        options: [
-            'default' => LoyalityCardTypeEnum::Silver,
-        ]
-    )]
+    #[ORM\Column]
     private ?int $card_type = null;
 
     #[ORM\Column(length: 16, unique: true)]
@@ -67,47 +57,29 @@ class LoyalityCard
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $renewed_at = null;
 
+    #[ORM\OneToOne(mappedBy: 'loyality_card', cascade: ['persist', 'remove'])]
+    private ?User $holder = null;
+
     public function __construct()
     {
-        $this->for_user = new ArrayCollection();
         $this->loyalityPoints = new ArrayCollection();
         $this->loyalityRewards = new ArrayCollection();
         $this->userCardRankingHistories = new ArrayCollection();
     }
 
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        $isCardActive = $this->is_active ? 'Active' : 'InActive';
+        return "$this->card_number[$isCardActive]";
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
-    public function getForUser(): Collection
-    {
-        return $this->for_user;
-    }
-
-    public function addForUser(User $forUser): self
-    {
-        if (!$this->for_user->contains($forUser)) {
-            $this->for_user->add($forUser);
-            $forUser->setLoyalityCard($this);
-        }
-
-        return $this;
-    }
-
-    public function removeForUser(User $forUser): self
-    {
-        if ($this->for_user->removeElement($forUser)) {
-            // set the owning side to null (unless already changed)
-            if ($forUser->getLoyalityCard() === $this) {
-                $forUser->setLoyalityCard(null);
-            }
-        }
-
-        return $this;
     }
 
     public function getCardType(): ?int
@@ -132,6 +104,15 @@ class LoyalityCard
         $this->card_number = $card_number;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCardNumberValue(): void
+    {
+        $this->card_number = ByteString::fromRandom(
+            16,
+            'abdeffgijklmnoprstuvwxyzABCDEFGHIJKLMNOPRSTUVWXYZ0123456789'
+        )->toString();
     }
 
     public function getIssueDate(): ?\DateTimeImmutable
@@ -280,6 +261,28 @@ class LoyalityCard
     public function setRenewedAt(?\DateTimeInterface $renewed_at): self
     {
         $this->renewed_at = $renewed_at;
+
+        return $this;
+    }
+
+    public function getHolder(): ?User
+    {
+        return $this->holder;
+    }
+
+    public function setHolder(?User $holder): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($holder === null && $this->holder !== null) {
+            $this->holder->setLoyalityCard(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($holder !== null && $holder->getLoyalityCard() !== $this) {
+            $holder->setLoyalityCard($this);
+        }
+
+        $this->holder = $holder;
 
         return $this;
     }

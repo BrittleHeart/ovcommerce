@@ -27,8 +27,8 @@ class LoyalityPoint
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(
-        options: ['default' => 'now()'],
-        type: Types::DATE_MUTABLE
+        type: Types::DATE_MUTABLE,
+        options: ['default' => 'now()']
     )]
     private ?\DateTimeInterface $updated_at = null;
 

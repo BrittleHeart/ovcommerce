@@ -2,85 +2,28 @@
 
 namespace App\Service;
 
-use Imagine\Gd\Imagine;
-use Imagine\Image\Box;
+use App\Dto\AbstractImageDto;
 use Imagine\Image\ImageInterface;
-use Imagine\Image\Point;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-/**
- * TODO: Check if upload directory exists
- */
-class ImageService
+abstract class ImageService
 {
-    private string $front = '';
-    private string $background = '';
-    private string $filename = '';
-    private readonly string $productUploadDir;
-    private readonly Imagine $imagine;
+    protected const IMAGE_UPLOAD_DIR = 'uploads';
 
     public function __construct(
-        #[Autowire('%app.productUploadDir%')] string $productUploadDir
+        /**
+         * @see /var/www/config/services.yaml parameters:
+         */
+        protected string $uploadDir,
     ) {
-        $this->imagine = new Imagine();
-        $this->productUploadDir = $productUploadDir;
     }
 
-    public function setFront(string $front): self
-    {
-        $this->front = $front;
+    abstract protected function setUploadDir(string $uploadDir): self;
 
-        return $this;
-    }
+    abstract public function getUploadDir(): string;
 
-    public function getFront(): string
-    {
-        return $this->front;
-    }
+    abstract public function createThumbnail(?AbstractImageDto $dto): ?ImageInterface;
 
-    public function setBackground(string $background): self
-    {
-        $this->background = $background;
+    abstract public static function getFilename(): string;
 
-        return $this;
-    }
-
-    public function getBackground(): string
-    {
-        return $this->background;
-    }
-
-    public function getFilename(): string
-    {
-        return $this->filename;
-    }
-
-    public function setFilename(string $filename): self
-    {
-        $this->filename = $filename;
-
-        return $this;
-    }
-
-    public function createThumbnail(): ?ImageInterface
-    {
-        $image = $this->imagine->open("{$this->productUploadDir}/{$this->getFront()}");
-        $bg = $this->imagine->open("{$this->productUploadDir}/{$this->getBackground()}");
-
-        /* @phpstan-ignore-next-line */
-        if (!($image instanceof ImageInterface) && !($bg instanceof ImageInterface)) {
-            return null;
-        }
-
-        $image->resize(new Box(200, 200));
-        $imageSize = $image->getSize();
-        $backgroundSize = $bg->getSize();
-
-        $imageWidth = ($backgroundSize->getWidth() - $imageSize->getWidth()) / 2;
-        $imageHeight = ($backgroundSize->getHeight() - $imageSize->getHeight()) / 2;
-
-        $image = $bg->paste($image, new Point((int) $imageWidth, (int) $imageHeight));
-
-        return $image->save($this->getFilename());
-    }
+    abstract public function deleteImage(string $filename): void;
 }

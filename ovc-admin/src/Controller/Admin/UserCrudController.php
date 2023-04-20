@@ -3,7 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
+use App\Entity\UserAccountStatusHistory;
 use App\Enum\UserAccountStatusEnum;
+use App\Repository\UserAccountStatusHistoryRepository;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -24,6 +28,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 
 class UserCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly UserAccountStatusHistoryRepository $userAccountStatusHistoryRepository,
+    ) {
+    }
+
     public static function getEntityFqcn(): string
     {
         return User::class;
@@ -34,12 +44,10 @@ class UserCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInPlural('Users')
             ->setEntityLabelInSingular('User')
-            ->setDefaultSort(['id' => 'ASC'])
             ->setSearchFields([
                 'email',
                 'username',
-            ])
-            ->setPaginatorPageSize(10);
+            ]);
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -59,7 +67,9 @@ class UserCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('uuid')->onlyOnDetail();
-        yield AssociationField::new('loyalityCard', 'Loyality Card')->onlyOnDetail();
+        yield AssociationField::new('loyality_card')
+            ->hideOnIndex()
+            ->setRequired(false);
         yield TextField::new('username')->onlyOnDetail();
         yield EmailField::new('email')->onlyOnDetail();
         yield ArrayField::new('roles');
@@ -92,5 +102,36 @@ class UserCrudController extends AbstractCrudController
     {
         return $actions
             ->remove(Action::INDEX, Action::NEW);
+    }
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param User $entityInstance
+     * @return void
+     */
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        parent::updateEntity($entityManager, $entityInstance);
+        if (!$entityInstance instanceof User) {
+            return;
+        }
+
+        $operator = $this->getUser();
+        if (!$operator instanceof User) {
+            return;
+        }
+
+        $entityInstance->setUpdatedAt(new \DateTime());
+        $this->userRepository->save($entityInstance);
+
+        $userAccountStatusHistoryEntity = new UserAccountStatusHistory();
+
+        $userAccountStatusHistoryEntity
+            ->setOperator($operator)
+            ->setForUser($entityInstance)
+            ->setAction($entityInstance->getStatus() ?? UserAccountStatusEnum::Open->value)
+            ->setCreatedAt(new \DateTimeImmutable());
+
+        $this->userAccountStatusHistoryRepository->save($userAccountStatusHistoryEntity, true);
     }
 }

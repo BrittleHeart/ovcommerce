@@ -126,10 +126,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserAccountStatusHistory::class)]
     private Collection $userAccountStatusHistories;
 
-    #[Groups(['user:item', 'user:update'])]
-    #[ORM\ManyToOne(inversedBy: 'for_user')]
-    private ?LoyalityCard $loyalityCard = null;
-
     /**
      * @var ArrayCollection<int, UserOrder> $userOrders
      */
@@ -172,6 +168,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserCardRankingHistory::class)]
     private Collection $userCardRankingHistories;
 
+    #[ORM\OneToOne(inversedBy: 'holder', cascade: ['persist', 'remove'])]
+    private ?LoyalityCard $loyality_card = null;
+
+    /**
+     * @var ArrayCollection<int, UserPaymentHistory> $userPaymentHistories
+     */
+    #[ORM\OneToMany(mappedBy: 'for_user', targetEntity: UserPaymentHistory::class)]
+    private Collection $userPaymentHistories;
+
     public function __construct()
     {
         $this->userAddresses = new ArrayCollection();
@@ -184,6 +189,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->opinions = new ArrayCollection();
         $this->visitedUrls = new ArrayCollection();
         $this->userCardRankingHistories = new ArrayCollection();
+        $this->userPaymentHistories = new ArrayCollection();
+    }
+
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        return $this->username;
     }
 
     public function getId(): ?int
@@ -467,18 +482,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLoyalityCard(): ?LoyalityCard
-    {
-        return $this->loyalityCard;
-    }
-
-    public function setLoyalityCard(?LoyalityCard $loyalityCard): self
-    {
-        $this->loyalityCard = $loyalityCard;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, UserOrder>
      */
@@ -667,6 +670,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUuid(string $uuid): self
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getLoyalityCard(): ?LoyalityCard
+    {
+        return $this->loyality_card;
+    }
+
+    public function setLoyalityCard(?LoyalityCard $loyality_card): self
+    {
+        $this->loyality_card = $loyality_card;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserPaymentHistory>
+     */
+    public function getUserPaymentHistories(): Collection
+    {
+        return $this->userPaymentHistories;
+    }
+
+    public function addUserPaymentHistory(UserPaymentHistory $userPaymentHistory): self
+    {
+        if (!$this->userPaymentHistories->contains($userPaymentHistory)) {
+            $this->userPaymentHistories->add($userPaymentHistory);
+            $userPaymentHistory->setForUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserPaymentHistory(UserPaymentHistory $userPaymentHistory): self
+    {
+        if ($this->userPaymentHistories->removeElement($userPaymentHistory)) {
+            // set the owning side to null (unless already changed)
+            if ($userPaymentHistory->getForUser() === $this) {
+                $userPaymentHistory->setForUser(null);
+            }
+        }
 
         return $this;
     }

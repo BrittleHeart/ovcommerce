@@ -17,6 +17,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
     description: 'Product',
@@ -57,6 +58,7 @@ class Product
     private ?string $price = null;
 
     #[Groups(['product:collection', 'product:item'])]
+    #[Assert\Range(min: 0, max: 100000)]
     #[ORM\Column]
     private ?int $quantity = null;
 
@@ -77,6 +79,7 @@ class Product
     private ?bool $is_on_sale = null;
 
     #[Groups(['product:collection', 'product:item'])]
+    #[Assert\Range(min: 0, max: 250)]
     #[ORM\Column]
     private ?int $points = null;
 
@@ -137,6 +140,9 @@ class Product
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: VisitedUrl::class)]
     private Collection $visitedUrls;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $merged_image_dir = null;
+
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
@@ -144,6 +150,15 @@ class Product
         $this->userProductOrderPointHistories = new ArrayCollection();
         $this->opinions = new ArrayCollection();
         $this->visitedUrls = new ArrayCollection();
+    }
+
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        return $this->name;
     }
 
     public function getId(): ?int
@@ -496,6 +511,18 @@ class Product
                 $visitedUrl->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getMergedImageDir(): ?string
+    {
+        return $this->merged_image_dir;
+    }
+
+    public function setMergedImageDir(string $merged_image_dir): self
+    {
+        $this->merged_image_dir = $merged_image_dir;
 
         return $this;
     }
