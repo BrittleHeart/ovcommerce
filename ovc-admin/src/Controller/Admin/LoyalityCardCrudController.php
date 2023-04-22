@@ -39,7 +39,7 @@ class LoyalityCardCrudController extends AbstractCrudController
         }
     }
 
-    /**
+    /*
      * TODO: Add action to be able to renew a loyalty card - Create a service
      */
 }

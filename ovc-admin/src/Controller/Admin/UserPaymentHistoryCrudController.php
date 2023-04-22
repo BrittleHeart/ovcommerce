@@ -30,7 +30,7 @@ class UserPaymentHistoryCrudController extends AbstractCrudController
                 'Submitted' => UserPaymentStatusEnum::Submitted->value,
                 'InValidation' => UserPaymentStatusEnum::InValidation->value,
                 'Rejected' => UserPaymentStatusEnum::Rejected->value,
-                'Accepted' => UserPaymentStatusEnum::Accepted->value
+                'Accepted' => UserPaymentStatusEnum::Accepted->value,
             ]));
     }
 

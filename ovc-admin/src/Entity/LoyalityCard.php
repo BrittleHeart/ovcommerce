@@ -74,6 +74,7 @@ class LoyalityCard
     public function __toString(): string
     {
         $isCardActive = $this->is_active ? 'Active' : 'InActive';
+
         return "$this->card_number[$isCardActive]";
     }
 
@@ -273,12 +274,12 @@ class LoyalityCard
     public function setHolder(?User $holder): self
     {
         // unset the owning side of the relation if necessary
-        if ($holder === null && $this->holder !== null) {
+        if (null === $holder && null !== $this->holder) {
             $this->holder->setLoyalityCard(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($holder !== null && $holder->getLoyalityCard() !== $this) {
+        if (null !== $holder && $holder->getLoyalityCard() !== $this) {
             $holder->setLoyalityCard($this);
         }
 

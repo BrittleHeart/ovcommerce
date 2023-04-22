@@ -72,9 +72,7 @@ class UserAddressCrudController extends AbstractCrudController
     }
 
     /**
-     * @param EntityManagerInterface $entityManager
      * @param UserAddress $entityInstance
-     * @return void
      */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {

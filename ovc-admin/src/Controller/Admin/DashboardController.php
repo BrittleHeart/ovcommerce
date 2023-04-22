@@ -80,5 +80,4 @@ class DashboardController extends AbstractDashboardController
             ->setPaginatorPageSize(10)
             ->setDefaultSort(['id' => 'ASC']);
     }
-
 }

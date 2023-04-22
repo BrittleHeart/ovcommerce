@@ -41,6 +41,8 @@ readonly class UserPaymentSubscriber implements EventSubscriberInterface
     }
 
     /**
+     * @psalm-suppress LessSpecificImplementedReturnType
+     *
      * @return array<array-key, string>
      */
     public static function getSubscribedEvents(): array

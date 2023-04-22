@@ -123,6 +123,12 @@ class UserPaymentCrudController extends AbstractCrudController
             return null;
         }
 
+        if (UserPaymentStatusEnum::Rejected->value === $entity->getStatus()) {
+            $this->addFlash('warning', 'Payment method has already been rejected');
+
+            return $this->redirect($context->getReferrer() ?? '');
+        }
+
         $this->paymentService->rejectPayment($entity);
         $this->addFlash('success', 'Payment method has been rejected');
 

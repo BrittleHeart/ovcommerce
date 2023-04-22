@@ -94,6 +94,7 @@ class MergedImageService extends ImageService
         }
 
         $image->resize(new Box(200, 200));
+        $bg->resize(new Box(400, 400));
         $imageSize = $image->getSize();
         $backgroundSize = $bg->getSize();
 
@@ -114,7 +115,6 @@ class MergedImageService extends ImageService
 
     /**
      * @param array<string> $files
-     * @return void
      */
     public function deleteImages(array $files = []): void
     {

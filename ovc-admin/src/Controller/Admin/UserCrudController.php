@@ -4,14 +4,17 @@ namespace App\Controller\Admin;
 
 use App\Entity\User;
 use App\Entity\UserAccountStatusHistory;
+use App\Enum\UserAccountActionEnum;
 use App\Enum\UserAccountStatusEnum;
-use App\Repository\UserAccountStatusHistoryRepository;
+use App\Enum\UserRolesEnum;
 use App\Repository\UserRepository;
+use App\Service\UserService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -25,12 +28,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class UserCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly UserAccountStatusHistoryRepository $userAccountStatusHistoryRepository,
+        private readonly UserService $userService,
     ) {
     }
 
@@ -44,6 +48,7 @@ class UserCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInPlural('Users')
             ->setEntityLabelInSingular('User')
+            ->setDefaultSort(['status' => 'ASC'])
             ->setSearchFields([
                 'email',
                 'username',
@@ -53,11 +58,19 @@ class UserCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
-            ->add(EntityFilter::new('loyalityCard'))
+            ->add(EntityFilter::new('loyality_card'))
             ->add(EntityFilter::new('userPayments'))
             ->add(EntityFilter::new('userAddresses'))
             ->add(ChoiceFilter::new('status')
-            ->setChoices(UserAccountStatusEnum::cases()))
+            ->setChoices(UserAccountStatusEnum::cases())
+                ->setChoices([
+                    'Open' => UserAccountStatusEnum::Open->value,
+                    'Blocked' => UserAccountStatusEnum::Blocked->value,
+                    'Closed' => UserAccountStatusEnum::Closed->value,
+                    'Email not Verified' => UserAccountStatusEnum::EmailNotVerified->value,
+                    'Temporamently Closed' => UserAccountStatusEnum::TemporamentlyClosed->value,
+                ])
+            )
             ->add(BooleanFilter::new('is_email_verified'))
             ->add(DateTimeFilter::new('last_login'))
             ->add(DateTimeFilter::new('created_at'));
@@ -100,38 +113,126 @@ class UserCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
+        $banUserAction = Action::new('ban_user', 'Ban User', 'fa fa-ban')
+            ->linkToCrudAction('banUserAction');
+
+        $unblockUser = Action::new('unblock_user', 'Unblock User', 'fa fa-unlock-alt')
+            ->linkToCrudAction('unblockUserAction');
+
         return $actions
-            ->remove(Action::INDEX, Action::NEW);
+            ->remove(Action::INDEX, Action::NEW)
+            ->add(Action::DETAIL, $banUserAction)
+            ->add(Action::DETAIL, $unblockUser);
     }
 
-    /**
-     * @param EntityManagerInterface $entityManager
-     * @param User $entityInstance
-     * @return void
-     */
-    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    public function banUserAction(AdminContext $context): ?RedirectResponse
     {
-        parent::updateEntity($entityManager, $entityInstance);
-        if (!$entityInstance instanceof User) {
-            return;
+        $entity = $this->getEntity($context);
+        if (null === $entity) {
+            return null;
         }
 
         $operator = $this->getUser();
         if (!$operator instanceof User) {
+            return null;
+        }
+
+        if (UserAccountStatusEnum::Blocked->value === $entity->getStatus()) {
+            $this->addFlash('warning', "User {$entity->getusername()} is already blocked.");
+
+            return $this->redirect($context->getReferrer() ?? '');
+        }
+
+        if (in_array(UserRolesEnum::Admin->value, $entity->getRoles())) {
+            $this->addFlash('danger', 'Administrator group cannot be blocked.');
+
+            return $this->redirect($context->getReferrer() ?? '');
+        }
+
+        $this->userRepository->changeUserStatus($entity, UserAccountStatusEnum::Blocked);
+
+        $userHistory = new UserAccountStatusHistory();
+        $this->userService->updateUserHistory(
+            $userHistory,
+            $operator,
+            $entity,
+            UserAccountActionEnum::from($entity->getStatus() ?? UserAccountActionEnum::Open->value)
+        );
+
+        $this->addFlash('success', "User {$entity->getusername()} has been blocked.");
+
+        return $this->redirect($context->getReferrer() ?? '');
+    }
+
+    public function unblockUserAction(AdminContext $context): ?RedirectResponse
+    {
+        $entity = $this->getEntity($context);
+        if (null === $entity) {
+            return null;
+        }
+
+        $operator = $this->getUser();
+        if (!$operator instanceof User) {
+            return null;
+        }
+
+        if (UserAccountStatusEnum::Open->value === $entity->getStatus()) {
+            $this->addFlash('warning', "User {$entity->getusername()} is already unblocked.");
+
+            return $this->redirect($context->getReferrer() ?? '');
+        }
+
+        $this->userRepository->changeUserStatus($entity, UserAccountStatusEnum::Open);
+        $userHistory = new UserAccountStatusHistory();
+        $this->userService->updateUserHistory(
+            $userHistory,
+            $operator,
+            $entity,
+            UserAccountActionEnum::Open
+        );
+
+        $this->addFlash('success', "User {$entity->getusername()} has been unblocked.");
+
+        return $this->redirect($context->getReferrer() ?? '');
+    }
+
+    /**
+     * @param User $entityInstance
+     */
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        parent::updateEntity($entityManager, $entityInstance);
+
+        $operator = $this->getUser();
+        $userHistory = new UserAccountStatusHistory();
+
+        if (!$operator instanceof User) {
             return;
         }
 
-        $entityInstance->setUpdatedAt(new \DateTime());
-        $this->userRepository->save($entityInstance);
+        $this->userRepository->updateUserLastChangesTimestamp($entityInstance);
 
-        $userAccountStatusHistoryEntity = new UserAccountStatusHistory();
+        $this->userService->updateUserHistory(
+            $userHistory,
+            $operator,
+            $entityInstance,
+            UserAccountActionEnum::from($entityInstance->getStatus() ?? UserAccountActionEnum::Open->value)
+        );
+    }
 
-        $userAccountStatusHistoryEntity
-            ->setOperator($operator)
-            ->setForUser($entityInstance)
-            ->setAction($entityInstance->getStatus() ?? UserAccountStatusEnum::Open->value)
-            ->setCreatedAt(new \DateTimeImmutable());
+    public function getEntity(AdminContext $context): ?User
+    {
+        $entity = $context->getEntity()->getInstance();
 
-        $this->userAccountStatusHistoryRepository->save($userAccountStatusHistoryEntity, true);
+        if (!is_object($entity)) {
+            return null;
+        }
+
+        if (!$entity instanceof User) {
+            $givenClass = get_class($entity);
+            throw new \InvalidArgumentException("Invalid entity. App\Entity\User expected. $givenClass given");
+        }
+
+        return $entity;
     }
 }
