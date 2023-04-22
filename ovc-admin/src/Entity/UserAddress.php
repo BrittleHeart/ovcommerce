@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserAddressRepository::class)]
 class UserAddress
 {
@@ -59,6 +60,15 @@ class UserAddress
     {
         $this->userPayments = new ArrayCollection();
         $this->userOrders = new ArrayCollection();
+    }
+
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        return $this->address_1;
     }
 
     public function getId(): ?int
@@ -148,6 +158,12 @@ class UserAddress
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 
     /**

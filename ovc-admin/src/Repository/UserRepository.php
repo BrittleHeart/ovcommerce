@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\UserAccountStatusEnum;
+use App\Enum\UserRolesEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -53,6 +55,27 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         $user->setPassword($newHashedPassword);
 
+        $this->save($user, true);
+    }
+
+    public function updateUserLastChangesTimestamp(User $user): void
+    {
+        $user->setUpdatedAt(new \DateTime());
+
+        $this->save($user, true);
+    }
+
+    public function changeUserStatus(User $user, UserAccountStatusEnum $userStatus): void
+    {
+        if (in_array(UserRolesEnum::Admin->value, $user->getRoles())) {
+            return;
+        }
+
+        if ($userStatus->value === $user->getStatus()) {
+            return;
+        }
+
+        $user->setStatus($userStatus->value);
         $this->save($user, true);
     }
 

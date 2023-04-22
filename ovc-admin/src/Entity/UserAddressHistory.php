@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserAddressHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserAddressHistoryRepository::class)]
 class UserAddressHistory
 {
@@ -62,5 +63,11 @@ class UserAddressHistory
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 }

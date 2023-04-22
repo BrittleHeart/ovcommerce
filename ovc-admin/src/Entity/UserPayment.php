@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\UserPaymentStatusEnum;
 use App\Enum\UserPaymentTypeEnum;
 use App\Repository\UserPaymentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -10,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserPaymentRepository::class)]
 class UserPayment
 {
@@ -22,10 +22,10 @@ class UserPayment
     #[ORM\JoinColumn(nullable: false)]
     private ?User $for_user = null;
 
-    #[ORM\Column(enumType: UserPaymentTypeEnum::class)]
+    #[ORM\Column]
     private ?int $payment_type = null;
 
-    #[ORM\Column(length: 16, nullable: true, unique: true)]
+    #[ORM\Column(length: 16, unique: true, nullable: true)]
     private ?string $card_number = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -40,7 +40,7 @@ class UserPayment
     #[ORM\ManyToMany(targetEntity: UserAddress::class, inversedBy: 'userPayments')]
     private Collection $billing_address;
 
-    #[ORM\Column(enumType: UserPaymentStatusEnum::class)]
+    #[ORM\Column]
     private ?int $status = null;
 
     #[ORM\Column(
@@ -49,8 +49,8 @@ class UserPayment
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(
-        options: ['default' => 'now()'],
-        type: Types::DATE_MUTABLE
+        type: Types::DATE_MUTABLE,
+        options: ['default' => 'now()']
     )]
     private ?\DateTimeInterface $updated_at = null;
 
@@ -64,6 +64,17 @@ class UserPayment
     {
         $this->billing_address = new ArrayCollection();
         $this->userOrders = new ArrayCollection();
+    }
+
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        $paymentType = UserPaymentTypeEnum::from($this->getPaymentType() ?? 1)->name;
+
+        return "{$this->getForUser()} [$paymentType]";
     }
 
     public function getId(): ?int
@@ -179,6 +190,12 @@ class UserPayment
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
@@ -189,6 +206,12 @@ class UserPayment
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updated_at = new \DateTime();
     }
 
     /**

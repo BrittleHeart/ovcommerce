@@ -2,62 +2,100 @@
 
 namespace App\Entity;
 
-use App\Enum\ProductAvailableOnEnum;
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Uuid;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
+#[ApiResource(
+    description: 'Product',
+    operations: [
+        new GetCollection(normalizationContext: ['groups' => 'product:collection']),
+        new Get(normalizationContext: ['groups' => 'product:item']),
+    ],
+    stateless: true
+)]
+#[ApiFilter(DateFilter::class, properties: ['created_at', 'updated_at'])]
+#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact', 'description' => 'partial', 'price' => 'partial'])]
+#[ApiFilter(BooleanFilter::class, properties: ['is_on_sale'])]
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
+    #[ApiProperty(readable: false, identifier: false)]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ApiProperty(identifier: true)]
+    #[Groups(['product:collection', 'product:item'])]
+    #[ORM\Column]
+    private ?string $uuid = null;
+
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(length: 100, unique: true)]
     private ?string $name = null;
 
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(type: Types::DECIMAL, precision: 7, scale: 2)]
     private ?string $price = null;
 
+    #[Groups(['product:collection', 'product:item'])]
+    #[Assert\Range(min: 0, max: 100000)]
     #[ORM\Column]
     private ?int $quantity = null;
 
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(length: 255)]
     private ?string $cover_url = null;
 
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(length: 255)]
     private ?string $background_url = null;
 
-    #[ORM\Column(length: 255)]
+    #[Groups(['product:collection', 'product:item'])]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $merged_url = null;
 
+    #[Groups(['product:collection', 'product:item'])]
     #[ORM\Column(options: ['default' => false])]
     private ?bool $is_on_sale = null;
 
+    #[Groups(['product:collection', 'product:item'])]
+    #[Assert\Range(min: 0, max: 250)]
     #[ORM\Column]
     private ?int $points = null;
 
-    #[ORM\Column(enumType: ProductAvailableOnEnum::class)]
+    #[Groups(['product:collection', 'product:item'])]
+    #[ORM\Column]
     private ?int $available_on = null;
 
-    #[ORM\Column(
-        options: ['default' => 'now()'],
-    )]
+    #[Groups(['product:collection', 'product:item'])]
+    #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
-    #[ORM\Column(
-        options: ['default' => 'now()'],
-        type: Types::DATE_MUTABLE
-    )]
-    private ?\DateTimeInterface $updated_at = null;
+    #[Groups(['product:collection', 'product:item'])]
+    #[ORM\Column]
+    private ?\DateTime $updated_at = null;
 
+    #[Groups(['product:item'])]
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
@@ -65,35 +103,45 @@ class Product
     /**
      * @var ArrayCollection<int, OrderItem> $orderItems
      */
+    #[Groups(['product:item'])]
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: OrderItem::class)]
     private Collection $orderItems;
 
     /**
      * @var ArrayCollection<int, UserFavorite> $userFavorites
      */
+    #[Groups(['product:item'])]
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: UserFavorite::class)]
     private Collection $userFavorites;
 
     /**
      * @var ArrayCollection<int, UserProductOrderPointHistory> $userProductOrderPointHistories
      */
+    #[Groups(['product:item'])]
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: UserProductOrderPointHistory::class)]
     private Collection $userProductOrderPointHistories;
 
+    #[Groups(['product:item'])]
     #[ORM\ManyToOne(inversedBy: 'products')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Coupon $coupon = null;
 
     /**
      * @var ArrayCollection<int, Opinion> $opinions
      */
+    #[Groups(['product:item'])]
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: Opinion::class)]
     private Collection $opinions;
 
     /**
      * @var ArrayCollection<int, VisitedUrl> $visitedUrls
      */
+    #[Groups(['product:item'])]
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: VisitedUrl::class)]
     private Collection $visitedUrls;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $merged_image_dir = null;
 
     public function __construct()
     {
@@ -104,9 +152,34 @@ class Product
         $this->visitedUrls = new ArrayCollection();
     }
 
+    /**
+     * @psalm-suppress InvalidToString
+     * @psalm-suppress NullableReturnStatement
+     */
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(?string $uuid): void
+    {
+        $this->uuid = $uuid;
+    }
+
+    #[ORM\PrePersist]
+    public function setUuidValue(): void
+    {
+        $this->uuid = Uuid::uuid4()->toString();
     }
 
     public function getName(): ?string
@@ -241,16 +314,31 @@ class Product
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    public function setUpdatedAt(\DateTime $updated_at): self
     {
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    #[ORM\PrePersist]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updated_at = new \DateTime('now', new \DateTimeZone('Europe/Warsaw'));
     }
 
     public function getCategory(): ?Category
@@ -423,6 +511,18 @@ class Product
                 $visitedUrl->setProduct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getMergedImageDir(): ?string
+    {
+        return $this->merged_image_dir;
+    }
+
+    public function setMergedImageDir(string $merged_image_dir): self
+    {
+        $this->merged_image_dir = $merged_image_dir;
 
         return $this;
     }
