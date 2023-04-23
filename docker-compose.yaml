@@ -80,8 +80,8 @@ services:
       - ovc-network
   ovc-client:
     build:
+      dockerfile: docker/Dockerfile
       context: ./ovc-client
-      dockerfile: Dockerfile
     container_name: ovc-client
     restart: always
     tty: true
@@ -90,17 +90,13 @@ services:
     ports:
       - "80:80"
   ovc-rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     container_name: ovc-rabbitmq
     restart: always
     tty: true
     ports:
       - "15672:15672"
       - "5672:5672"
-    volumes:
-      - ./ovc-admin/docker/rabbitmq/data:/var/lib/rabbitmq
-      - ./ovc-admin/docker/rabbitmq/config:/etc/rabbitmq/
-    command: bash -c "sleep 10; rabbitmq-server;"
     networks:
       - ovc-network
 volumes:
