@@ -39,6 +39,24 @@ class LoyalityCardRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function renewCard(LoyalityCard $card, \DateInterval $duration): void
+    {
+        $current = new \DateTimeImmutable();
+
+        // For now, there's no sense for renewing a unexpired card
+        if ($card->isExpired() && false === $card->isIsRenewable()) {
+            return;
+        }
+
+        $card->setExpirationDate($current->add($duration));
+        $card->setRenewedAt(new \DateTime());
+
+        $this->save($card, true);
+    }
+
 //    /**
 //     * @return LoyalityCard[] Returns an array of LoyalityCard objects
 //     */

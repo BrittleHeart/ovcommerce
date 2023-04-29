@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\LoyalityPointRepository;
+use App\Validator as OvValidator;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[OvValidator\LoyaltyPoint]
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: LoyalityPointRepository::class)]
 class LoyalityPoint
 {
@@ -73,6 +76,12 @@ class LoyalityPoint
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
@@ -83,5 +92,11 @@ class LoyalityPoint
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 }
