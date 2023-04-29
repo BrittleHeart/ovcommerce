@@ -5,6 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Category;
 use App\Entity\Coupon;
 use App\Entity\LoyalityCard;
+use App\Entity\LoyalityPoint;
+use App\Entity\LoyalityReward;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Entity\UserAccountStatusHistory;
@@ -58,7 +60,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Product Coupon', 'fa fas fa-ticket-alt', Coupon::class);
 
         yield MenuItem::section('Loyalty system');
-        yield MenuItem::linkToCrud('Loyality Card', 'fas fa-id-card', LoyalityCard::class);
+        yield MenuItem::linkToCrud('Loyalty Card', 'fas fa-id-card', LoyalityCard::class);
+        yield MenuItem::linkToCrud('Loyalty Card Points', 'fa-solid fa-trophy', LoyalityPoint::class);
+        yield MenuItem::linkToCrud('Loyalty Card Rewards', 'fa-solid fa-award', LoyalityReward::class);
 
         yield MenuItem::section('histories');
         yield MenuItem::linkToCrud('User History', 'fa fa-history', UserAccountStatusHistory::class);

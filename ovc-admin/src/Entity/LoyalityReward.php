@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
-use App\Enum\RewardTypeEnum;
 use App\Repository\LoyalityRewardRepository;
+use App\Validator as OvValidator;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
+#[OvValidator\LoyaltyReward]
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: LoyalityRewardRepository::class)]
 class LoyalityReward
 {
@@ -14,10 +17,13 @@ class LoyalityReward
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
+    #[Assert\LessThan(value: 100000)]
     #[ORM\Column]
     private ?int $points_required = null;
 
-    #[ORM\Column(enumType: RewardTypeEnum::class)]
+    #[Assert\NotBlank]
+    #[ORM\Column]
     private ?int $reward_type = null;
 
     #[ORM\Column(nullable: true)]
@@ -82,6 +88,12 @@ class LoyalityReward
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 
     public function getLoyalityCard(): ?LoyalityCard

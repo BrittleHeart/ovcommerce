@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
+use App\Enum\RewardTypeEnum;
 use App\Repository\LoyalityCardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\String\ByteString;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: LoyalityCardRepository::class)]
@@ -24,9 +26,11 @@ class LoyalityCard
     #[ORM\Column(length: 16, unique: true)]
     private ?string $card_number = null;
 
+    #[Assert\LessThan(propertyPath: 'expiration_date')]
     #[ORM\Column]
     private ?\DateTimeImmutable $issue_date = null;
 
+    #[Assert\GreaterThan(propertyPath: 'issue_date')]
     #[ORM\Column]
     private ?\DateTimeImmutable $expiration_date = null;
 
@@ -141,6 +145,16 @@ class LoyalityCard
     }
 
     /**
+     * @throws \Exception
+     */
+    public function isExpired(): bool
+    {
+        $current = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Warsaw'));
+
+        return $current > $this->getExpirationDate();
+    }
+
+    /**
      * @return Collection<int, LoyalityPoint>
      */
     public function getLoyalityPoints(): Collection
@@ -170,12 +184,47 @@ class LoyalityCard
         return $this;
     }
 
+    public function countPoints(): int
+    {
+        $loyaltyPoints = 0;
+
+        foreach ($this->loyalityPoints as $loyaltyPoint) {
+            $loyaltyPoints += $loyaltyPoint->getPoints() ?? 0;
+        }
+
+        return $loyaltyPoints;
+    }
+
     /**
      * @return Collection<int, LoyalityReward>
      */
     public function getLoyalityRewards(): Collection
     {
         return $this->loyalityRewards;
+    }
+
+    /**
+     * @phpstan-ignore-next-line
+     */
+    public function getLoyalityRewardsType(): ?array
+    {
+        $rewardsType = [];
+
+        $loyalityRewards = $this->getLoyalityRewards();
+        if (!count($loyalityRewards)) {
+            return null;
+        }
+
+        foreach ($this->getLoyalityRewards() as $reward) {
+            $rewardsType[] = RewardTypeEnum::from($reward->getRewardType() ?? 1)->name;
+        }
+
+        return array_unique($rewardsType);
+    }
+
+    public function getRewardsCount(): ?int
+    {
+        return count($this->getLoyalityRewards());
     }
 
     public function addLoyalityReward(LoyalityReward $loyalityReward): self
