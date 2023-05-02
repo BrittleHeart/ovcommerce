@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\LoyalityCardTypeEnum;
 use App\Enum\RewardTypeEnum;
 use App\Repository\LoyalityCardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -20,7 +21,7 @@ class LoyalityCard
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ['default' => LoyalityCardTypeEnum::Silver->value])]
     private ?int $card_type = null;
 
     #[ORM\Column(length: 16, unique: true)]
@@ -64,6 +65,9 @@ class LoyalityCard
     #[ORM\OneToOne(mappedBy: 'loyality_card', cascade: ['persist', 'remove'])]
     private ?User $holder = null;
 
+    #[ORM\Column(options: ['default' => LoyalityCardTypeEnum::Silver->value])]
+    private ?int $previous_card_type = null;
+
     public function __construct()
     {
         $this->loyalityPoints = new ArrayCollection();
@@ -97,6 +101,12 @@ class LoyalityCard
         $this->card_type = $card_type;
 
         return $this;
+    }
+
+    #[Orm\PrePersist]
+    public function setCardTypeValue(): void
+    {
+        $this->card_type = LoyalityCardTypeEnum::Silver->value;
     }
 
     public function getCardNumber(): ?string
@@ -335,5 +345,23 @@ class LoyalityCard
         $this->holder = $holder;
 
         return $this;
+    }
+
+    public function getPreviousCardType(): ?int
+    {
+        return $this->previous_card_type;
+    }
+
+    public function setPreviousCardType(int $previous_card_type): self
+    {
+        $this->previous_card_type = $previous_card_type;
+
+        return $this;
+    }
+
+    #[Orm\PrePersist]
+    public function setPreviousCardTypeValue(): void
+    {
+        $this->previous_card_type = LoyalityCardTypeEnum::Silver->value;
     }
 }

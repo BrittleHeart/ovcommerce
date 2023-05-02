@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Entity\UserAccountStatusHistory;
 use App\Entity\UserAddress;
 use App\Entity\UserAddressHistory;
+use App\Entity\UserCardRankingHistory;
 use App\Entity\UserPayment;
 use App\Entity\UserPaymentHistory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -68,6 +69,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('User History', 'fa fa-history', UserAccountStatusHistory::class);
         yield MenuItem::linkToCrud('User Address History', 'fa fa-history', UserAddressHistory::class);
         yield MenuItem::linkToCrud('User Payment Status History', 'fa fa-history', UserPaymentHistory::class);
+        yield MenuItem::linkToCrud('User Card Ranking History', 'fa fa-history', UserCardRankingHistory::class);
     }
 
     public function configureActions(): Actions

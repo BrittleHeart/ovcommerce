@@ -20,6 +20,14 @@ class CategoryCrudController extends AbstractCrudController
         return Category::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setSearchFields(['name'])
+            ->setEntityLabelInSingular('Category')
+            ->setEntityLabelInPlural('Categories');
+    }
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
@@ -27,12 +35,6 @@ class CategoryCrudController extends AbstractCrudController
         yield DateTimeField::new('created_at')->onlyOnIndex();
         yield DateTimeField::new('updated_at')->onlyOnIndex();
         yield AssociationField::new('products');
-    }
-
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud
-            ->setSearchFields(['name']);
     }
 
     public function configureFilters(Filters $filters): Filters

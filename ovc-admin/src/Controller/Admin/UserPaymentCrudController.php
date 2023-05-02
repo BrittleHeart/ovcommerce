@@ -36,7 +36,9 @@ class UserPaymentCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setSearchFields(['for_user']);
+            ->setSearchFields(['for_user'])
+            ->setEntityLabelInSingular('User Payment')
+            ->setEntityLabelInPlural('User Payments');
     }
 
     public function configureFilters(Filters $filters): Filters

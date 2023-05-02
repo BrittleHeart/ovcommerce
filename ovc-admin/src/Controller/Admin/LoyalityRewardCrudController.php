@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\LoyalityReward;
 use App\Enum\RewardTypeEnum;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -19,6 +20,13 @@ class LoyalityRewardCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return LoyalityReward::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Card Reward')
+            ->setEntityLabelInPlural('Card Rewards');
     }
 
     public function configureFilters(Filters $filters): Filters

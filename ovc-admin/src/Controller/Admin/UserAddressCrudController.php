@@ -33,7 +33,8 @@ class UserAddressCrudController extends AbstractCrudController
     {
         return $crud
             ->setSearchFields(['city', 'country', 'first_name', 'last_name'])
-            ->setPageTitle(Action::INDEX, 'User Addresses');
+            ->setEntityLabelInSingular('User Address')
+            ->setEntityLabelInPlural('User Addresses');
     }
 
     public function configureFilters(Filters $filters): Filters

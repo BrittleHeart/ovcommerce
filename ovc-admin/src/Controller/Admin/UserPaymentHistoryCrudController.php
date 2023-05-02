@@ -6,6 +6,7 @@ use App\Entity\UserPaymentHistory;
 use App\Enum\UserPaymentStatusEnum;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -20,6 +21,13 @@ class UserPaymentHistoryCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return UserPaymentHistory::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Payment History')
+            ->setEntityLabelInPlural('Payment Histories');
     }
 
     public function configureFilters(Filters $filters): Filters

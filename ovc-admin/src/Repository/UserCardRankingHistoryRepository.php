@@ -38,7 +38,6 @@ class UserCardRankingHistoryRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
 //    /**
 //     * @return UserCardRankingHistory[] Returns an array of UserCardRankingHistory objects
 //     */
