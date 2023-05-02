@@ -31,6 +31,14 @@ class ProductCrudController extends AbstractCrudController
         return Product::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setSearchFields(['name', 'uuid'])
+            ->setEntityLabelInSingular('Product')
+            ->setEntityLabelInPlural('Products');
+    }
+
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
@@ -45,12 +53,6 @@ class ProductCrudController extends AbstractCrudController
                     'Both' => ProductAvailableOnEnum::Both->value,
                 ]))
             ->add(EntityFilter::new('category'));
-    }
-
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud
-            ->setSearchFields(['name', 'uuid']);
     }
 
     public function configureFields(string $pageName): iterable

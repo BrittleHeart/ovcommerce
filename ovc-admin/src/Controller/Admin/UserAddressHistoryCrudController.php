@@ -24,7 +24,8 @@ class UserAddressHistoryCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPageTitle(Action::INDEX, 'User Address Histories')
+            ->setEntityLabelInSingular('User Addresses History')
+            ->setEntityLabelInPlural('Users Addresses Histories')
             ->setSearchFields(['new_country']);
     }
 

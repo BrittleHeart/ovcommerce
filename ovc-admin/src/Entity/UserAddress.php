@@ -26,7 +26,7 @@ class UserAddress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $address_2 = null;
 
-    #[ORM\Column(length: 8)]
+    #[ORM\Column(length: 10)]
     private ?string $postal_code = null;
 
     #[ORM\Column(length: 255)]

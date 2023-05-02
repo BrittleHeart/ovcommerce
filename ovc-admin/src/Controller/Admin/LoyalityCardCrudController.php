@@ -4,10 +4,13 @@ namespace App\Controller\Admin;
 
 use App\Entity\LoyalityCard;
 use App\Enum\LoyalityCardTypeEnum;
+use App\Enum\UserCardRankingHistoryActionEnum;
 use App\Repository\LoyalityCardRepository;
+use App\Service\LoyaltyCardService;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
@@ -18,12 +21,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LoyalityCardCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly LoyalityCardRepository $cardRepository,
+        private readonly LoyaltyCardService $loyaltyCardService,
     ) {
     }
 
@@ -32,14 +40,40 @@ class LoyalityCardCrudController extends AbstractCrudController
         return LoyalityCard::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Loyalty Card')
+            ->setEntityLabelInPlural('Loyalty Cards');
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add(EntityFilter::new('holder', 'User'))
+            ->add(ChoiceFilter::new('card_type', 'Card Type')->setChoices([
+                'Silver' => LoyalityCardTypeEnum::Silver->value,
+                'Gold' => LoyalityCardTypeEnum::Gold->value,
+                'Platinum' => LoyalityCardTypeEnum::Platinum->value,
+                'Diamond' => LoyalityCardTypeEnum::Diamond->value,
+                'VIP' => LoyalityCardTypeEnum::VIP->value,
+            ]))
+            ->add(DateTimeFilter::new('issue_date'))
+            ->add(DateTimeFilter::new('expiration_date'))
+            ->add(BooleanFilter::new('is_active'))
+            ->add(BooleanFilter::new('is_renewable'));
+    }
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnDetail();
-        yield AssociationField::new('holder')->onlyOnDetail();
+        if (Crud::PAGE_EDIT === $pageName || Crud::PAGE_DETAIL === $pageName) {
+            yield AssociationField::new('holder', 'User');
+            yield ChoiceField::new('card_type')
+                ->setChoices(LoyalityCardTypeEnum::cases());
+        }
         yield TextField::new('card_number')->hideOnForm();
-        yield ChoiceField::new('card_type')
-            ->setChoices(LoyalityCardTypeEnum::cases());
-        yield DateTimeField::new('issue_date');
+        yield DateTimeField::new('issue_date')->hideWhenUpdating();
         yield DateTimeField::new('expiration_date');
         yield BooleanField::new('is_active')
             ->renderAsSwitch(false);
@@ -60,7 +94,9 @@ class LoyalityCardCrudController extends AbstractCrudController
             ->linkToCrudAction('renewCardAction');
 
         return $actions
-            ->add(Action::DETAIL, $renewCard);
+            ->add(Action::DETAIL, $renewCard)
+            ->remove(Action::INDEX, Action::DELETE)
+            ->remove(Action::DETAIL, Action::DELETE);
     }
 
     /**
@@ -88,6 +124,7 @@ class LoyalityCardCrudController extends AbstractCrudController
         }
 
         $this->cardRepository->renewCard($loyaltyCard, $duration);
+        $this->loyaltyCardService->createCardHistoryWithAction($loyaltyCard, UserCardRankingHistoryActionEnum::CardRankingRenewed);
 
         $this->addFlash('success', 'Card has been renewed.');
 

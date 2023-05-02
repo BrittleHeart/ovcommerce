@@ -6,13 +6,17 @@ use App\Entity\User;
 use App\Enum\UserAccountStatusEnum;
 use App\Enum\UserRolesEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Faker\Generator;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserFixtures extends Fixture
+class UserFixtures extends Fixture implements FixtureGroupInterface
 {
-    private \Faker\Generator $faker;
+    private Generator $faker;
+
+    public const ADMIN_USER_REFERENCE = 'admin';
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
@@ -70,5 +74,12 @@ class UserFixtures extends Fixture
         $user->setLastLogin(new \DateTime());
         $manager->persist($user);
         $manager->flush();
+
+        $this->addReference(self::ADMIN_USER_REFERENCE, $user);
+    }
+
+    public static function getGroups(): array
+    {
+        return ['user'];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\UserAccountStatusHistory;
-use App\Enum\UserAccountActionEnum;
+use App\Entity\UserCardRankingHistory;
+use App\Enum\UserCardRankingHistoryActionEnum;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -16,40 +16,42 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 
-class UserAccountStatusHistoryCrudController extends AbstractCrudController
+class UserCardRankingHistoryCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return UserAccountStatusHistory::class;
+        return UserCardRankingHistory::class;
     }
 
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('User Status')
-            ->setEntityLabelInPlural('Users Status Histories');
+            ->setEntityLabelInSingular('Card Ranking History')
+            ->setEntityLabelInPlural('Card Ranking Histories');
     }
 
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
-            ->add(EntityFilter::new('operator'))
-            ->add(EntityFilter::new('for_user'))
+            ->add(EntityFilter::new('loyality_card', 'Card'))
+            ->add(EntityFilter::new('for_user', 'User'))
             ->add(ChoiceFilter::new('action')->setChoices([
-                'Open' => UserAccountActionEnum::Open->value,
-                'Blocked' => UserAccountActionEnum::Blocked->value,
-                'Closed' => UserAccountActionEnum::Closed->value,
-                'TemperamentallyClosed' => UserAccountActionEnum::TemporamentlyClosed->value,
+                'New Card' => UserCardRankingHistoryActionEnum::NewCard->value,
+                'Ranking Changed' => UserCardRankingHistoryActionEnum::CardRankingChanged->value,
+                'Ranking Renewed' => UserCardRankingHistoryActionEnum::CardRankingRenewed->value,
+                'Ranking Expired' => UserCardRankingHistoryActionEnum::CardRankingExpired->value,
+                'User Assigned' => UserCardRankingHistoryActionEnum::UserAssigned->value,
+                'Deactivated Card' => UserCardRankingHistoryActionEnum::DeactivatedCard->value,
             ]));
     }
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id');
-        yield AssociationField::new('operator');
-        yield AssociationField::new('for_user');
+        yield IdField::new('id')->onlyOnIndex();
+        yield AssociationField::new('for_user', 'User');
+        yield AssociationField::new('loyality_card', 'Card');
         yield ChoiceField::new('action')
-            ->setChoices(UserAccountActionEnum::cases());
+            ->setChoices(UserCardRankingHistoryActionEnum::cases());
         yield DateTimeField::new('created_at');
     }
 

@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Enum\UserCardRankingHistoryActionEnum;
 use App\Repository\UserCardRankingHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
+#[HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserCardRankingHistoryRepository::class)]
 class UserCardRankingHistory
 {
@@ -15,14 +16,14 @@ class UserCardRankingHistory
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userCardRankingHistories')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $for_user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userCardRankingHistories')]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'userCardRankingHistories')]
     #[ORM\JoinColumn(nullable: false)]
     private ?LoyalityCard $loyality_card = null;
 
-    #[ORM\Column(enumType: UserCardRankingHistoryActionEnum::class)]
+    #[ORM\Column]
     private ?int $action = null;
 
     #[ORM\Column(
@@ -81,5 +82,11 @@ class UserCardRankingHistory
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    #[Orm\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 }
