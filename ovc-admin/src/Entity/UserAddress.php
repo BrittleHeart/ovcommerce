@@ -68,7 +68,7 @@ class UserAddress
      */
     public function __toString(): string
     {
-        return $this->address_1;
+        return $this->getFullAddress();
     }
 
     public function getId(): ?int
@@ -86,6 +86,20 @@ class UserAddress
         $this->for_user = $for_user;
 
         return $this;
+    }
+
+    public function getFullAddress(): string
+    {
+        $address = $this->getAddress1();
+        $country = $this->getCountry();
+        $city = $this->getCity();
+        $postalCode = $this->getPostalCode();
+
+        if (null === $address || null === $country || null === $postalCode || null === $city) {
+            return '';
+        }
+
+        return "$address, $postalCode $city, $country";
     }
 
     public function getAddress1(): ?string

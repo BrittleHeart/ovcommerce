@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: UserOrderRepository::class)]
 class UserOrder
 {
@@ -53,6 +54,11 @@ class UserOrder
     {
         $this->orderItems = new ArrayCollection();
         $this->userProductOrderPointHistories = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return "Order no.{$this->getId()}";
     }
 
     public function getId(): ?int
@@ -120,6 +126,41 @@ class UserOrder
         return $this;
     }
 
+    public function calculateTotalPrice(): ?float
+    {
+        $total = 0;
+        $orderItems = $this->getOrderItems();
+        if (!count($orderItems)) {
+            return null;
+        }
+
+        foreach ($orderItems as $orderItem) {
+            if (false !== filter_var($orderItem->getPrice(), FILTER_VALIDATE_FLOAT)) {
+                $product = $orderItem
+                    ->getProduct();
+
+                if (null === $product) {
+                    return null;
+                }
+
+                $coupon = $product->getCoupon();
+                if (null === $coupon) {
+                    $total += (float) $orderItem->getPrice();
+
+                    return $total;
+                }
+
+                $couponValue = $coupon->getValue() ?? 0;
+
+                $total += (float) $orderItem->getPrice() * ((float) $couponValue / 100);
+            } else {
+                return null;
+            }
+        }
+
+        return $total;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->created_at;
@@ -130,6 +171,12 @@ class UserOrder
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 
     /**

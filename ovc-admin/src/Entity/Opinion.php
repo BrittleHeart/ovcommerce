@@ -22,7 +22,7 @@ class Opinion
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
-    #[ORM\Column(enumType: OpinionProductRateEnum::class)]
+    #[ORM\Column]
     private ?int $product_rate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -30,6 +30,16 @@ class Opinion
 
     #[ORM\Column]
     private ?bool $is_approved = null;
+
+    public function __toString(): string
+    {
+        if (!is_int($this->getProductRate())) {
+            return "{$this->getByUser()} []";
+        }
+
+        $rate = OpinionProductRateEnum::from($this->getProductRate())->name;
+        return "{$this->getByUser()} [$rate]";
+    }
 
     public function getId(): ?int
     {

@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\UserAddress;
 use App\Entity\UserAddressHistory;
+use App\Enum\UserPaymentTypeEnum;
 use App\Repository\UserAddressHistoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -12,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -47,7 +49,7 @@ class UserAddressCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         if (Crud::PAGE_INDEX === $pageName || Crud::PAGE_DETAIL === $pageName) {
-            yield IdField::new('id');
+            yield IdField::new('id')->onlyOnDetail();
             yield AssociationField::new('for_user');
             yield TextField::new('address_1');
             yield TextField::new('address_2');
@@ -57,8 +59,11 @@ class UserAddressCrudController extends AbstractCrudController
             yield TextField::new('first_name');
             yield TextField::new('last_name');
             yield DateTimeField::new('created_at');
-            yield AssociationField::new('userPayments')->onlyOnDetail();
-            yield AssociationField::new('userOrders')->onlyOnDetail();
+            yield CollectionField::new('userPayments')
+                ->onlyOnDetail()
+                ->allowAdd(false)
+                ->renderExpanded(false);
+            yield CollectionField::new('userOrders')->onlyOnDetail();
         }
 
         if (Crud::PAGE_EDIT === $pageName) {

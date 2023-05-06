@@ -7,6 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -34,7 +35,7 @@ class CategoryCrudController extends AbstractCrudController
         yield TextField::new('name');
         yield DateTimeField::new('created_at')->onlyOnIndex();
         yield DateTimeField::new('updated_at')->onlyOnIndex();
-        yield AssociationField::new('products');
+        yield CollectionField::new('products');
     }
 
     public function configureFilters(Filters $filters): Filters
