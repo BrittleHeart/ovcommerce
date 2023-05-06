@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -45,6 +46,7 @@ class UserPaymentCrudController extends AbstractCrudController
     {
         return $filters
             ->add(EntityFilter::new('for_user'))
+            ->add(EntityFilter::new('billing_address', 'Billing Address'))
             ->add(ChoiceFilter::new('status')->setChoices([
                 'In Validation' => UserPaymentStatusEnum::InValidation->value,
                 'Rejected' => UserPaymentStatusEnum::Rejected->value,
@@ -75,7 +77,7 @@ class UserPaymentCrudController extends AbstractCrudController
 
         if (Crud::PAGE_DETAIL === $pageName) {
             yield IdField::new('id')->onlyOnDetail();
-            yield AssociationField::new('billing_address');
+            yield CollectionField::new('billing_address');
             yield DateTimeField::new('created_at');
             yield DateTimeField::new('updated_at');
         }

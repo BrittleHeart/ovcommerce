@@ -27,6 +27,16 @@ class UserFavorite
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $disliked_at = null;
 
+    public function __toString(): string
+    {
+        $favoriteProduct = $this->getProduct();
+        if (null === $favoriteProduct) {
+            throw new \LogicException('User favorite cannot have nullable product');
+        }
+
+        return "{$this->getByUser()} [{$favoriteProduct->getName()}]";
+    }
+
     public function getId(): ?int
     {
         return $this->id;

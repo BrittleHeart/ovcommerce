@@ -45,7 +45,7 @@ class UserAccountStatusHistoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id');
+        yield IdField::new('id')->onlyOnDetail();
         yield AssociationField::new('operator');
         yield AssociationField::new('for_user');
         yield ChoiceField::new('action')

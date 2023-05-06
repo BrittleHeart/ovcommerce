@@ -2,52 +2,54 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\UserPaymentHistory;
-use App\Enum\UserPaymentStatusEnum;
+use App\Entity\UserProductOrderPointHistory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\NumericFilter;
 
-class UserPaymentHistoryCrudController extends AbstractCrudController
+class UserProductOrderPointHistoryCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return UserPaymentHistory::class;
+        return UserProductOrderPointHistory::class;
     }
 
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setEntityLabelInSingular('Payment History')
-            ->setEntityLabelInPlural('Payment Histories');
+            ->setEntityLabelInSingular('Order Point History')
+            ->setEntityLabelInPlural('Order Points Histories');
     }
 
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
             ->add(EntityFilter::new('for_user', 'User'))
-            ->add(ChoiceFilter::new('payment_method_status', 'Method status')->setChoices([
-                'Submitted' => UserPaymentStatusEnum::Submitted->value,
-                'InValidation' => UserPaymentStatusEnum::InValidation->value,
-                'Rejected' => UserPaymentStatusEnum::Rejected->value,
-                'Accepted' => UserPaymentStatusEnum::Accepted->value,
-            ]));
+            ->add(EntityFilter::new('product'))
+            ->add(EntityFilter::new('for_order', 'Order'))
+            ->add(NumericFilter::new('points_earned', 'Points earned'))
+            ->add(DateTimeFilter::new('created_at'));
     }
 
+    /**
+     * TODO: Add counting points subscriber for this history in persisting.
+     */
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnDetail();
         yield AssociationField::new('for_user', 'User');
-        yield ChoiceField::new('payment_method_status', 'Method status')
-            ->setChoices(UserPaymentStatusEnum::cases());
+        yield AssociationField::new('product');
+        yield AssociationField::new('for_order', 'Order');
+        yield NumberField::new('points_earned', 'Points earned');
         yield DateTimeField::new('created_at');
     }
 

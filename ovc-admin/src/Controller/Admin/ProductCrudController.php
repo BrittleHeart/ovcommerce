@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
@@ -115,10 +116,10 @@ class ProductCrudController extends AbstractCrudController
             ->setRequired(false)
             ->hideOnIndex();
 
-        yield AssociationField::new('opinions')
+        yield CollectionField::new('opinions')
             ->onlyOnDetail();
 
-        yield AssociationField::new('visitedUrls')
+        yield CollectionField::new('visitedUrls')
             ->onlyOnDetail();
     }
 }

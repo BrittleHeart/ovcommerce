@@ -47,7 +47,7 @@ class UserCardRankingHistoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id')->onlyOnIndex();
+        yield IdField::new('id')->onlyOnDetail();
         yield AssociationField::new('for_user', 'User');
         yield AssociationField::new('loyality_card', 'Card');
         yield ChoiceField::new('action')

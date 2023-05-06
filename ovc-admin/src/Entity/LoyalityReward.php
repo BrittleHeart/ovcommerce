@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\RewardTypeEnum;
 use App\Repository\LoyalityRewardRepository;
 use App\Validator as OvValidator;
 use Doctrine\ORM\Mapping as ORM;
@@ -36,6 +37,21 @@ class LoyalityReward
         options: ['default' => 'now()']
     )]
     private ?\DateTimeImmutable $created_at = null;
+
+    public function __toString(): string
+    {
+        if (null === $this->getRewardType()) {
+            throw new \LogicException('Something is wrong with Loyalty Reward Entity');
+        }
+
+        $rewardType = RewardTypeEnum::from((int) $this->getRewardType())->name;
+
+        if (RewardTypeEnum::Discount->name === $rewardType) {
+            return "Discount [{$this->getRewardValue()}%]";
+        }
+
+        return $rewardType;
+    }
 
     public function getId(): ?int
     {

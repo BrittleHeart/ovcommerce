@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
+use App\Entity\UserAddress;
 use App\Entity\UserPayment;
 use App\Enum\UserPaymentStatusEnum;
 use App\Enum\UserPaymentTypeEnum;
@@ -17,6 +18,7 @@ use Faker\Generator;
 class UserPaymentFixtures extends Fixture implements FixtureGroupInterface, DependentFixtureInterface
 {
     private Generator $faker;
+    public const ADMIN_PAYMENT_REF = 'admin_payment';
 
     public function __construct()
     {
@@ -26,7 +28,13 @@ class UserPaymentFixtures extends Fixture implements FixtureGroupInterface, Depe
     public function load(ObjectManager $manager): void
     {
         $user = $this->getReference(UserFixtures::ADMIN_USER_REFERENCE);
+        $address = $this->getReference(UserAddressFixtures::USER_ADDRESS_REF);
+
         if (!$user instanceof User) {
+            return;
+        }
+
+        if (!$address instanceof UserAddress) {
             return;
         }
 
@@ -37,6 +45,9 @@ class UserPaymentFixtures extends Fixture implements FixtureGroupInterface, Depe
         $payment->setCardExpirationDay((new \DateTime())->add(new \DateInterval('P1Y')));
         $payment->setCardholderName($this->faker->firstNameMale());
         $payment->setCardNumber($this->faker->creditCardNumber());
+        $payment->addBillingAddress($address);
+
+        $this->addReference(self::ADMIN_PAYMENT_REF, $payment);
 
         $manager->persist($payment);
         $manager->flush();
@@ -57,6 +68,7 @@ class UserPaymentFixtures extends Fixture implements FixtureGroupInterface, Depe
     {
         return [
             UserFixtures::class,
+            UserAddressFixtures::class,
         ];
     }
 }

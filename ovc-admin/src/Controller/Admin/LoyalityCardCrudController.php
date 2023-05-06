@@ -13,10 +13,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
@@ -71,6 +71,10 @@ class LoyalityCardCrudController extends AbstractCrudController
             yield AssociationField::new('holder', 'User');
             yield ChoiceField::new('card_type')
                 ->setChoices(LoyalityCardTypeEnum::cases());
+            yield CollectionField::new('loyalityRewards', 'Rewards')
+                ->allowAdd(false)
+                ->renderExpanded(false)
+                ->useEntryCrudForm();
         }
         yield TextField::new('card_number')->hideOnForm();
         yield DateTimeField::new('issue_date')->hideWhenUpdating();
@@ -83,7 +87,6 @@ class LoyalityCardCrudController extends AbstractCrudController
 
         if (Crud::PAGE_DETAIL === $pageName) {
             yield DateTimeField::new('renewed_at');
-            yield ArrayField::new('getLoyalityRewardsType', 'Rewards');
             yield NumberField::new('getRewardsCount', 'Rewards count');
         }
     }

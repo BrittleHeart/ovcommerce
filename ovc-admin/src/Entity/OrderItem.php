@@ -6,6 +6,7 @@ use App\Repository\OrderItemRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
 class OrderItem
 {
@@ -28,14 +29,12 @@ class OrderItem
     #[ORM\Column(type: Types::DECIMAL, precision: 7, scale: 2)]
     private ?string $price = null;
 
-    #[ORM\Column(
-        options: ['default' => 'now()'],
-    )]
+    #[ORM\Column(options: ['default' => 'now()'], )]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column(
-        options: ['default' => 'now()'],
-        type: Types::DATETIME_MUTABLE
+        type: Types::DATETIME_MUTABLE,
+        options: ['default' => 'now()']
     )]
     private ?\DateTimeInterface $updated_at = null;
 
@@ -104,6 +103,12 @@ class OrderItem
         return $this;
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
@@ -114,5 +119,11 @@ class OrderItem
         $this->updated_at = $updated_at;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 }

@@ -100,15 +100,15 @@ class UserCrudController extends AbstractCrudController
         yield DateTimeField::new('last_login')->hideOnForm();
         yield DateTimeField::new('created_at')->hideOnForm();
         yield DateTimeField::new('updated_at')->hideOnForm();
-        yield AssociationField::new('userPayments')->onlyOnDetail();
-        yield AssociationField::new('userAddresses')->onlyOnDetail();
-        yield AssociationField::new('userAddressHistories')->onlyOnDetail();
-        yield AssociationField::new('userOrders', 'Orders')->onlyOnDetail();
-        yield AssociationField::new('userFavorites', 'Favorites')->onlyOnDetail();
-        yield AssociationField::new('userProductOrderPointHistories')->onlyOnDetail();
-        yield AssociationField::new('opinions')->onlyOnDetail();
-        yield AssociationField::new('visitedUrls')->onlyOnDetail();
-        yield AssociationField::new('userCardRankingHistories', 'Card ranking histories')->onlyOnDetail();
+        yield ArrayField::new('userPayments')->onlyOnDetail();
+        yield ArrayField::new('userAddresses')->onlyOnDetail();
+        yield ArrayField::new('userAddressHistories')->onlyOnDetail();
+        yield ArrayField::new('userOrders', 'Orders')->onlyOnDetail();
+        yield ArrayField::new('userFavorites', 'Favorites')->onlyOnDetail();
+        yield ArrayField::new('userProductOrderPointHistories')->onlyOnDetail();
+        yield ArrayField::new('opinions')->onlyOnDetail();
+        yield ArrayField::new('visitedUrls')->onlyOnDetail();
+        yield ArrayField::new('userCardRankingHistories', 'Card ranking histories')->onlyOnDetail();
     }
 
     public function configureActions(Actions $actions): Actions
