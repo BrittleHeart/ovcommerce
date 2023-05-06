@@ -33,11 +33,8 @@ class Opinion
 
     public function __toString(): string
     {
-        if (!is_int($this->getProductRate())) {
-            return "{$this->getByUser()} []";
-        }
+        $rate = OpinionProductRateEnum::from($this->getProductRate() ?? 1)->name;
 
-        $rate = OpinionProductRateEnum::from($this->getProductRate())->name;
         return "{$this->getByUser()} [$rate]";
     }
 

@@ -45,10 +45,9 @@ class LoyalityReward
         }
 
         $rewardType = RewardTypeEnum::from((int) $this->getRewardType())->name;
-        /* @psalm-suppress TypeDoesNotContainType */
-        if ('Discount' === $rewardType) {
-            /* @psalm-suppress InvalidCast */
-            return "Discount [{$this->getRewardValue()}]";
+
+        if (RewardTypeEnum::Discount->name === $rewardType) {
+            return "Discount [{$this->getRewardValue()}%]";
         }
 
         return $rewardType;

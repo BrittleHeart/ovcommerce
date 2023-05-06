@@ -59,5 +59,4 @@ class OrderItemCrudController extends AbstractCrudController
             ->remove(Action::INDEX, Action::EDIT)
             ->remove(Action::DETAIL, Action::EDIT);
     }
-
 }
