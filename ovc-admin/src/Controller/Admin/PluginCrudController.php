@@ -16,7 +16,7 @@ class PluginCrudController extends AbstractCrudController
     {
         return Plugin::class;
     }
-    
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnDetail();
@@ -29,7 +29,7 @@ class PluginCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-    	return $actions
+        return $actions
             ->remove(Action::INDEX, Action::NEW);
     }
 }

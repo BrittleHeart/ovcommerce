@@ -2,18 +2,18 @@
 
 namespace App\Plugin;
 
-class PluginManager implements PluginInterface 
+class PluginManager implements PluginInterface
 {
     /**
-    * @var array<array-key, PluginInterface> $plugins
-    */
+     * @var array<array-key, PluginInterface>
+     */
     protected array $plugins = [];
 
     /**
-    * Adds the plugin to the array. 
-    * @returns self is plugin not preset in $plugins
-    * @returns null if plugin is already preset in plugins
-    */
+     * Adds the plugin to the array.
+     *
+     * @return self is plugin not preset in $plugins
+     */
     public function add(PluginInterface $plugin): ?self
     {
         if (in_array($plugin, $this->plugins)) {
@@ -23,15 +23,15 @@ class PluginManager implements PluginInterface
         $this->plugins[] = $plugin;
 
         return $this;
-    } 
+    }
 
     /**
-    * Registers all plugins
-    */
+     * Registers all plugins.
+     */
     public function register(): void
     {
-        foreach($this->plugins as $plugin) {
+        foreach ($this->plugins as $plugin) {
             $plugin->register();
-        }  
-    }        
+        }
+    }
 }

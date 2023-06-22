@@ -73,6 +73,7 @@ abstract class ReportGenerator
 
     /**
      * Add fields to the report file content.
+     *
      * @param array<int|string, scalar> $fields
      *
      * @return array<int|string, scalar>

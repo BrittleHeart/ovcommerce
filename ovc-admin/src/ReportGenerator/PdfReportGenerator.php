@@ -3,8 +3,6 @@
 namespace App\ReportGenerator;
 
 use App\Contract\ReportGeneratorInterface;
-use App\Parser\CsvFileParser;
-use App\Parser\FileParser;
 
 class PdfReportGenerator extends ReportGenerator implements ReportGeneratorInterface
 {

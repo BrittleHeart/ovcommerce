@@ -2,9 +2,6 @@
 
 namespace App\Dto;
 
-use App\Enum\ReportDataTypeEnum;
-use App\Enum\ReportTypeEnum;
-
 class ReportData extends Dto
 {
     public function __construct(

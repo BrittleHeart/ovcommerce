@@ -6,6 +6,7 @@ class Dto
 {
     /**
      * @psalm-suppress MixedReturnTypeCoercion
+     *
      * @return array<string, scalar>
      */
     public function toArray(): array

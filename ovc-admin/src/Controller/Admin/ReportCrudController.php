@@ -56,7 +56,7 @@ class ReportCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnDetail();
-        yield TextField::new('report_name','Name');
+        yield TextField::new('report_name', 'Name');
         yield ChoiceField::new('report_type', 'Type')
             ->setChoices(ReportTypeEnum::cases());
         yield ChoiceField::new('report_data_type', 'Data Type')

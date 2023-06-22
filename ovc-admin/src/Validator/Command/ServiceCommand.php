@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-#[Attribute]
+#[\Attribute]
 class ServiceCommand extends Constraint
 {
     /*
@@ -17,9 +17,9 @@ class ServiceCommand extends Constraint
      */
     public string $message = 'The value "{{ value }}" is not valid.';
 
-    public string $valueNotString = "The value {{ value }} is not a string";
+    public string $valueNotString = 'The value {{ value }} is not a string';
 
-    public string $pregMatchFailed = "The value {{ value }} does not follow the pattern [a-zA-Z_]{3,}";
+    public string $pregMatchFailed = 'The value {{ value }} does not follow the pattern [a-zA-Z_]{3,}';
 
     public function validatedBy(): string
     {
