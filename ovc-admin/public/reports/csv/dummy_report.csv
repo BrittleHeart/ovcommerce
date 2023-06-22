@@ -1,0 +1,10 @@
+Id,userName,firstName,lastName,roles
+1,ov,bartosz,pazdur,"[""admin"", ""user""]"
+2,fick,agnieszka,kowalczyk,[]
+3,jd,john,doe,"[""user""]"
+4,js,jane,smith,"[""admin""]"
+5,bw,bob,wilson,[]
+6,ak,alice,kim,"[""admin"", ""user""]"
+7,mj,mike,jones,"[""admin""]"
+8,lh,lisa,hall,"[""user""]"
+9,th,tom,garcia,"[""user""]"

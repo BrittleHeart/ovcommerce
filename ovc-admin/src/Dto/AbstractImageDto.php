@@ -2,7 +2,7 @@
 
 namespace App\Dto;
 
-abstract class AbstractImageDto
+abstract class AbstractImageDto extends Dto
 {
     public function __construct(
         public string $uploadDir,

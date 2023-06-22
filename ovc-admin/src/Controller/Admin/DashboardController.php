@@ -9,7 +9,9 @@ use App\Entity\LoyalityPoint;
 use App\Entity\LoyalityReward;
 use App\Entity\Opinion;
 use App\Entity\OrderItem;
+use App\Entity\Plugin;
 use App\Entity\Product;
+use App\Entity\Report;
 use App\Entity\User;
 use App\Entity\UserAccountStatusHistory;
 use App\Entity\UserAddress;
@@ -50,6 +52,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToUrl('Back to website', 'fa fa-home', 'http://localhost');
+        yield MenuItem::linkToCrud('PLugins', 'fa fa-puzzle-piece', Plugin::class);
 
         yield MenuItem::section('Main');
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
@@ -82,6 +85,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('User Payment Status History', 'fa fa-history', UserPaymentHistory::class);
         yield MenuItem::linkToCrud('User Card Ranking History', 'fa fa-history', UserCardRankingHistory::class);
         yield MenuItem::linkToCrud('User Order Points History', 'fa fa-history', UserProductOrderPointHistory::class);
+
+        yield MenuItem::section('Reports');
+        yield MenuItem::linkToCrud('Report', 'fa fa-line-chart', Report::class);
     }
 
     public function configureActions(): Actions
